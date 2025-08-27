@@ -1,6 +1,10 @@
 TODO
 ====
 
+Player - ondrag or keyup player disappears (double loop call from BaseScene?)
+
+soliderA bullets need to be rotated (-90)
+
 HUD - rename ca -> sp
 
 soldierB - fix projectile angle and interval
