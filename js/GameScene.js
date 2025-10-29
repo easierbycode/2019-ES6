@@ -2223,7 +2223,7 @@ export class GameScene extends BaseScene {
         // Goki's intro animation/sequence (from original code)
         const gokiBossData = { ...globals.resources.recipe.data.bossData.bossExtra }; // Goki is 'bossExtra'
         gokiBossData.explosion = this.explosionTextures;
-        // Pre-process Goki anim/tama textures if needed
+        // Pre-process Goki animation/bullet textures if needed
 
         const goki = new BossGoki(gokiBossData);
         goki.on(Boss.CUSTOM_EVENT_DEAD, this.handleBossRemoved.bind(this));
@@ -2290,26 +2290,26 @@ export class GameScene extends BaseScene {
     }
 
     handleEnemyShoot(enemyContext) {
-        const tamaData = { ...enemyContext.tamaData }; // Clone base data
-        if (!tamaData || !tamaData.texture) return; // No bullet data
+        const bulletData = { ...enemyContext.tamaData }; // Clone base data
+        if (!bulletData || !bulletData.texture) return; // No bullet data
 
-        tamaData.explosion = this.explosionTextures; // Add explosion effect
+        bulletData.explosion = this.explosionTextures; // Add explosion effect
 
-        // Specific bullet spawning logic based on enemy/tama name
-        switch (tamaData.name) {
+        // Specific bullet spawning logic based on enemy bullet type
+        switch (bulletData.name) {
             case 'beam': // FANG beam
                 // Needs special handling for rotation and positioning based on 'cnt'
-                const beamCount = tamaData.cnt = (tamaData.cnt === undefined ? 0 : (tamaData.cnt + 1) % 3); // Cycle 0, 1, 2
+                const beamCount = bulletData.cnt = (bulletData.cnt === undefined ? 0 : (bulletData.cnt + 1) % 3); // Cycle 0, 1, 2
                 const angles = [105, 90, 75]; // Angles in degrees
                 const offsets = [{ x: 121, y: 50 }, { x: 141, y: 50 }]; // Emitter points
                 const hitAreas = [ // Define hit areas relative to anchor (0.5)
-                    new PIXI.Rectangle(-1.35 * tamaData.texture[0].height, -10, tamaData.texture[0].height, tamaData.texture[0].width / 2), // 105 deg
-                    new PIXI.Rectangle(-0.5 * tamaData.texture[0].height, 0, tamaData.texture[0].height, tamaData.texture[0].width / 2), // 90 deg
-                    new PIXI.Rectangle(-0.15 * tamaData.texture[0].height, -5, tamaData.texture[0].height, tamaData.texture[0].width / 2) // 75 deg
+                    new PIXI.Rectangle(-1.35 * bulletData.texture[0].height, -10, bulletData.texture[0].height, bulletData.texture[0].width / 2), // 105 deg
+                    new PIXI.Rectangle(-0.5 * bulletData.texture[0].height, 0, bulletData.texture[0].height, bulletData.texture[0].width / 2), // 90 deg
+                    new PIXI.Rectangle(-0.15 * bulletData.texture[0].height, -5, bulletData.texture[0].height, bulletData.texture[0].width / 2) // 75 deg
                 ];
 
                 offsets.forEach(offset => {
-                    const bullet = new Bullet(tamaData);
+                    const bullet = new Bullet(bulletData);
                     const angleRad = angles[beamCount] * Math.PI / 180;
                     bullet.character.rotation = angleRad; // Rotate the visual sprite
                     bullet.rotation = angleRad; // Store for movement logic if not using rotX/Y
@@ -2326,7 +2326,7 @@ export class GameScene extends BaseScene {
                 break;
             case 'smoke': // FANG smoke
                 const smokeAngle = (60 * Math.random() + 60) * Math.PI / 180; // Random angle 60-120 deg
-                const smokeBullet = new Bullet(tamaData);
+                const smokeBullet = new Bullet(bulletData);
                 smokeBullet.unit.hitArea = new PIXI.Rectangle(-smokeBullet.character.width / 2 + 20, -smokeBullet.character.height / 2 + 20, smokeBullet.character.width - 40, smokeBullet.character.height - 40);
                 smokeBullet.rotX = Math.cos(smokeAngle);
                 smokeBullet.rotY = Math.sin(smokeAngle);
@@ -2341,7 +2341,7 @@ export class GameScene extends BaseScene {
             case 'meka': // FANG meka swarm
                 const numMekas = 32;
                 for (let i = 0; i < numMekas; i++) {
-                    const mekaBullet = new Bullet(tamaData);
+                    const mekaBullet = new Bullet(bulletData);
                     mekaBullet.start = 10 * i; // Stagger start time
                     mekaBullet.playerRef = this.player; // Give reference for targeting
                     mekaBullet.position.set(enemyContext.x + enemyContext.unit.hitArea.x + enemyContext.unit.hitArea.width / 2,
@@ -2363,7 +2363,7 @@ export class GameScene extends BaseScene {
                 const numFieldBullets = 72;
                 const radius = 50;
                 for (let i = 0; i < numFieldBullets; i++) {
-                    const fieldBullet = new Bullet(tamaData);
+                    const fieldBullet = new Bullet(bulletData);
                     const angle = (i / numFieldBullets) * 360 * Math.PI / 180;
                     fieldBullet.rotX = Math.cos(angle);
                     fieldBullet.rotY = Math.sin(angle);
@@ -2378,7 +2378,7 @@ export class GameScene extends BaseScene {
                 break;
 
             default: // Standard enemy bullet
-                const bullet = new Bullet(tamaData);
+                const bullet = new Bullet(bulletData);
                 // Position relative to the enemy that fired it
                 bullet.position.set(
                     enemyContext.x + enemyContext.unit.hitArea.x + enemyContext.unit.hitArea.width / 2 - bullet.unit.width / 2,
@@ -2386,7 +2386,7 @@ export class GameScene extends BaseScene {
                 );
                 // Determine bullet direction (e.g., towards player or straight down)
                 bullet.rotation = 90 * Math.PI / 180; // Straight down
-                bullet.speed = tamaData.speed || 3; // Use default speed if not specified
+                bullet.speed = bulletData.speed || 3; // Use default speed if not specified
 
                 bullet.on(Bullet.CUSTOM_EVENT_DEAD_COMPLETE, () => this.removeEnemyBulletById(bullet.id));
                 this.bulletContainer.addChild(bullet);
