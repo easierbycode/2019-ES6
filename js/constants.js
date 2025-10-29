@@ -118,35 +118,45 @@ export const LANG = (() => {
 })();
 
 export const BASE_PATH = (() => {
-    let urlString = "http://localhost/"; // Default string
+    // Check if running in browser environment
+    if (typeof window === 'undefined') {
+        return "/"; // Default for non-browser environments
+    }
 
-    if (typeof window !== 'undefined' && "baseUrl" in window) {
+    // First, check for explicit window.baseUrl
+    if ("baseUrl" in window) {
         const baseUrlFromWindow = window.baseUrl;
-
-        // Check if baseUrlFromWindow is a non-empty string before assigning
         if (typeof baseUrlFromWindow === 'string' && baseUrlFromWindow.trim() !== '') {
-            urlString = baseUrlFromWindow;
-        }
-        // You could add more checks here if window.baseUrl might be other types,
-        // like checking if it's an element and getting its innerHTML/textContent:
-        // else if (baseUrlFromWindow instanceof HTMLElement) {
-        //     urlString = baseUrlFromWindow.innerHTML || baseUrlFromWindow.textContent || urlString;
-        // }
-        else {
-            console.warn(`window.baseUrl found but is not a valid string ('${baseUrlFromWindow}'). Using default: ${urlString}`);
+            try {
+                const domainRemoved = baseUrlFromWindow.replace(/^https?\:\/\/[^\/]+/, "");
+                const apiRemoved = domainRemoved.replace(/\/api\/$/, "");
+                return apiRemoved;
+            } catch (e) {
+                console.error("Error processing window.baseUrl:", e);
+            }
         }
     }
 
-    // Now urlString is guaranteed to be a string
-    try {
-        // Perform the replacements
-        const domainRemoved = urlString.replace(/^https?\:\/\/[^\/]+/, "");
-        const apiRemoved = domainRemoved.replace(/\/api\/$/, "");
-        return apiRemoved;
-    } catch (e) {
-        console.error("Error processing BASE_PATH:", e, "Input string was:", urlString);
-        return "/"; // Return a safe default path on error
+    // Auto-detect GitHub Pages deployment
+    // GitHub Pages URLs: https://username.github.io/repo-name/
+    const hostname = window.location.hostname;
+    const pathname = window.location.pathname;
+
+    if (hostname.endsWith('.github.io') || hostname === 'localhost' || hostname === '127.0.0.1') {
+        // Extract the first path segment (repository name for GitHub Pages)
+        const match = pathname.match(/^\/([^\/]+)/);
+        if (match && match[1]) {
+            // For GitHub Pages with repo name
+            const repoName = match[1];
+            // Exclude common local dev patterns
+            if (hostname !== 'localhost' && hostname !== '127.0.0.1') {
+                return `/${repoName}/`;
+            }
+        }
     }
+
+    // Default to root path for local development
+    return "/";
 })();
 
 export const BGM_INFO = {
