@@ -1,5 +1,6 @@
 // Player.js (Original 'M')
 import { BaseUnit } from './BaseUnit.js';
+import { Bullet } from './Bullet.js';
 import * as Constants from './constants.js';
 // Import specific constants from constants.js
 import { SHOOT_MODES, SHOOT_SPEEDS } from './constants.js';
@@ -913,61 +914,84 @@ export class Player extends BaseUnit {
 
     // --- Shooting Logic ---
     shoot() {
-         let bulletsData = [];
-         const rotationRad = -90 * Math.PI / 180; // -90 degrees for upwards
-
          switch (this.shootMode) {
              case SHOOT_MODES.NORMAL: {
-                 const data = { ...this.shootNormalData }; // Clone data
-                 data.id = this.bulletIdCnt++;
-                 data.rotation = rotationRad;
-                 // Position relative to player center, adjusted for bullet size
-                 data.startX = 0 + Math.cos(rotationRad + Math.PI/2) * 5 + 14 - this.character.width / 2;
-                 data.startY = 0 + Math.sin(rotationRad + Math.PI/2) * 5 + 11 - this.character.height / 2;
-                 bulletsData.push(data);
+                 const bullet = new Bullet(this.shootNormalData);
+                 bullet.unit.rotation = 270 * Math.PI / 180;
+                 bullet.unit.x = this.unit.x + 5 * Math.sin(bullet.unit.rotation) + 14;
+                 bullet.unit.y = this.unit.y + 5 * Math.sin(bullet.unit.rotation) + 11;
+                 bullet.name = SHOOT_MODES.NORMAL;
+                 bullet.id = this.bulletIdCnt++;
+                 bullet.shadowReverse = false;
+                 bullet.shadowOffsetY = 0;
+                 bullet.on(BaseUnit.CUSTOM_EVENT_DEAD, this.bulletRemove.bind(this, bullet));
+                 bullet.on(BaseUnit.CUSTOM_EVENT_DEAD_COMPLETE, this.bulletRemoveComplete.bind(this, bullet));
+                 this.addChild(bullet);
+                 this.bulletList.push(bullet);
                  Sound.stop('se_shoot');
                  Sound.play('se_shoot');
                  break;
              }
              case SHOOT_MODES.BIG: {
-                 const data = { ...this.shootBigData };
-                 data.id = this.bulletIdCnt++;
-                 data.rotation = rotationRad;
-                 data.startX = 0 + Math.cos(rotationRad + Math.PI/2) * 5 + 10 - this.character.width / 2;
-                 data.startY = 0 + Math.sin(rotationRad + Math.PI/2) * 5 + 22 - this.character.height / 2;
-                 bulletsData.push(data);
+                 const bullet = new Bullet(this.shootBigData);
+                 bullet.unit.rotation = 270 * Math.PI / 180;
+                 bullet.unit.x = this.unit.x + 5 * Math.sin(bullet.unit.rotation) + 10;
+                 bullet.unit.y = this.unit.y + 5 * Math.sin(bullet.unit.rotation) + 22;
+                 bullet.name = SHOOT_MODES.BIG;
+                 bullet.id = this.bulletIdCnt++;
+                 bullet.shadowReverse = false;
+                 bullet.shadowOffsetY = 0;
+                 bullet.on(BaseUnit.CUSTOM_EVENT_DEAD, this.bulletRemove.bind(this, bullet));
+                 bullet.on(BaseUnit.CUSTOM_EVENT_DEAD_COMPLETE, this.bulletRemoveComplete.bind(this, bullet));
+                 this.addChild(bullet);
+                 this.bulletList.push(bullet);
                  Sound.stop('se_shoot_b');
                  Sound.play('se_shoot_b');
                  break;
              }
              case SHOOT_MODES.THREE_WAY: {
-                 const angles = [-100, -90, -80]; // Degrees relative to horizontal
-                 const offsets = [
-                     { x: 6, y: 11 },
-                     { x: 10, y: 11 },
-                     { x: 14, y: 11 }
-                 ];
-                 angles.forEach((angle, index) => {
-                     const angleRad = angle * Math.PI / 180;
-                     const data = { ...this.shoot3wayData };
-                     data.id = this.bulletIdCnt++;
-                     data.rotation = angleRad;
-                     // Adjust start position based on angle and offset
-                     data.startX = 0 + Math.cos(angleRad + Math.PI/2) * 5 + offsets[index].x - this.character.width / 2;
-                     data.startY = 0 + Math.sin(angleRad + Math.PI/2) * 5 + offsets[index].y - this.character.height / 2;
-                     bulletsData.push(data);
-                 });
+                 for (let i = 0; i < 3; i++) {
+                     const bullet = new Bullet(this.shoot3wayData);
+                     if (i === 0) {
+                         bullet.unit.rotation = 280 * Math.PI / 180;
+                         bullet.unit.x = this.unit.x + 5 * Math.cos(bullet.unit.rotation) + 14;
+                         bullet.unit.y = this.unit.y + 5 * Math.sin(bullet.unit.rotation) + 11;
+                     } else if (i === 1) {
+                         bullet.unit.rotation = 270 * Math.PI / 180;
+                         bullet.unit.x = this.unit.x + 5 * Math.cos(bullet.unit.rotation) + 10;
+                         bullet.unit.y = this.unit.y + 5 * Math.sin(bullet.unit.rotation) + 11;
+                     } else if (i === 2) {
+                         bullet.unit.rotation = 260 * Math.PI / 180;
+                         bullet.unit.x = this.unit.x + 5 * Math.cos(bullet.unit.rotation) + 6;
+                         bullet.unit.y = this.unit.y + 5 * Math.sin(bullet.unit.rotation) + 11;
+                     }
+                     bullet.id = this.bulletIdCnt++;
+                     bullet.shadowReverse = false;
+                     bullet.shadowOffsetY = 0;
+                     bullet.on(BaseUnit.CUSTOM_EVENT_DEAD, this.bulletRemove.bind(this, bullet));
+                     bullet.on(BaseUnit.CUSTOM_EVENT_DEAD_COMPLETE, this.bulletRemoveComplete.bind(this, bullet));
+                     this.addChild(bullet);
+                     this.bulletList.push(bullet);
+                 }
                  Sound.stop('se_shoot');
                  Sound.play('se_shoot');
                  break;
              }
          }
-
-         // Emit event for the scene to create bullets
-         this.emit(Player.CUSTOM_EVENT_BULLET_ADD, bulletsData);
     }
-    static CUSTOM_EVENT_BULLET_ADD = "playerBulletAdd"; // Define the event
 
+    bulletRemove(bullet) {
+        for (let i = 0; i < this.bulletList.length; i++) {
+            if (bullet.id === this.bulletList[i].id) {
+                this.bulletList.splice(i, 1);
+                break;
+            }
+        }
+    }
+
+    bulletRemoveComplete(bullet) {
+        this.removeChild(bullet);
+    }
 
     updateShootData() {
          switch (this.shootMode) {

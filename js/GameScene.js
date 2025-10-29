@@ -1576,7 +1576,7 @@ export class GameScene extends BaseScene {
         // Entity Lists
         this.enemies = [];
         this.items = [];
-        this.playerBullets = [];
+        // this.playerBullets = []; // No longer used - Player manages its own bullets
         this.enemyBullets = []; // Use gameState.enemyBulletList ? Original used D.enemyBulletList but wasn't populated
 
         this.stageEnemyPositionList = []; // Loaded in run()
@@ -1639,7 +1639,7 @@ export class GameScene extends BaseScene {
 
 
         this.player = new Player(playerData);
-        this.player.on(Player.CUSTOM_EVENT_BULLET_ADD, this.handlePlayerShoot.bind(this));
+        // Player now manages its own bullets directly - no event needed
         this.player.on(Player.CUSTOM_EVENT_DEAD, this.gameover.bind(this));
         this.player.on(Player.CUSTOM_EVENT_DEAD_COMPLETE, this.gameoverComplete.bind(this));
         gameState.playerRef = this.player; // Update global reference
@@ -1703,7 +1703,7 @@ export class GameScene extends BaseScene {
         this.bossTimerCountDown = 99;
         this.enemies = [];
         this.items = [];
-        this.playerBullets = [];
+        // this.playerBullets = []; // No longer used - Player manages its own bullets
         this.enemyBullets = [];
 
         // --- Start BGM ---
@@ -1771,13 +1771,16 @@ export class GameScene extends BaseScene {
         // Player Loop (already handles movement, shooting logic internally)
         // Player's loop is called by BaseScene's loop if it exists
 
-        // Update Player Bullets
-        for (let i = this.playerBullets.length - 1; i >= 0; i--) {
-            const bullet = this.playerBullets[i];
-            bullet.loop(delta);
-            // Check off-screen
-            if (bullet.y < -bullet.height || bullet.x < -bullet.width || bullet.x > Constants.GAME_DIMENSIONS.WIDTH) {
-                this.removePlayerBullet(bullet, i);
+        // Update Player Bullets (managed by player now)
+        if (this.player && this.player.bulletList) {
+            for (let i = this.player.bulletList.length - 1; i >= 0; i--) {
+                const bullet = this.player.bulletList[i];
+                bullet.loop(delta);
+                // Check off-screen - bullets remove themselves via player.bulletRemove
+                if (bullet.y < -bullet.height || bullet.x < -bullet.width || bullet.x > Constants.GAME_DIMENSIONS.WIDTH) {
+                    this.player.bulletRemove(bullet);
+                    this.player.bulletRemoveComplete(bullet);
+                }
             }
         }
 
@@ -1888,22 +1891,24 @@ export class GameScene extends BaseScene {
             return collision;
         };
         // --- End Hit Test ---
-        // Player Bullets vs Enemies
-        for (let i = this.playerBullets.length - 1; i >= 0; i--) {
-            const bullet = this.playerBullets[i];
-            if (bullet.deadFlg) continue;
+        // Player Bullets vs Enemies (bullets managed by player)
+        if (this.player && this.player.bulletList) {
+            for (let i = this.player.bulletList.length - 1; i >= 0; i--) {
+                const bullet = this.player.bulletList[i];
+                if (bullet.deadFlg) continue;
 
-            for (let j = this.enemies.length - 1; j >= 0; j--) {
-                const enemy = this.enemies[j];
-                if (enemy.deadFlg) continue;
+                for (let j = this.enemies.length - 1; j >= 0; j--) {
+                    const enemy = this.enemies[j];
+                    if (enemy.deadFlg) continue;
 
-                // Check visibility and basic distance? Optional optimization
-                // if (!enemy.visible || Math.abs(bullet.x - enemy.x) > 100) continue;
+                    // Check visibility and basic distance? Optional optimization
+                    // if (!enemy.visible || Math.abs(bullet.x - enemy.x) > 100) continue;
 
-                if (hitTest(bullet.unit, enemy.unit)) {
-                    this.handlePlayerBulletHitEnemy(bullet, enemy, i, j);
-                    // Break inner loop if bullet should only hit one enemy? Depends on bullet type.
-                    if (bullet.deadFlg) break; // Break if bullet died
+                    if (hitTest(bullet.unit, enemy.unit)) {
+                        this.handlePlayerBulletHitEnemy(bullet, enemy, i, j);
+                        // Break inner loop if bullet should only hit one enemy? Depends on bullet type.
+                        if (bullet.deadFlg) break; // Break if bullet died
+                    }
                 }
             }
         }
@@ -2045,8 +2050,13 @@ export class GameScene extends BaseScene {
         this.theWorldFlg = true; // Freeze game
         if (this.boss) this.boss.onTheWorld(true); // Tell boss world is frozen
 
-        // Stop player bullets
-        this.playerBullets.forEach(b => this.removePlayerBullet(b, -1)); // Use -1 index to avoid splice issues
+        // Stop player bullets (managed by player now)
+        if (this.player && this.player.bulletList) {
+            [...this.player.bulletList].forEach(b => {
+                this.player.bulletRemove(b);
+                this.player.bulletRemoveComplete(b);
+            });
+        }
 
         this.boss.shungokusatsu(this.player.unit, true); // Trigger Goki's animation
 
@@ -2217,8 +2227,13 @@ export class GameScene extends BaseScene {
         this.hud.caBtnDeactive();
         currentVega.tlShoot?.pause(); // Pause Vega's actions
 
-        // Stop player bullets
-        this.playerBullets.forEach(b => this.removePlayerBullet(b, -1));
+        // Stop player bullets (managed by player now)
+        if (this.player && this.player.bulletList) {
+            [...this.player.bulletList].forEach(b => {
+                this.player.bulletRemove(b);
+                this.player.bulletRemoveComplete(b);
+            });
+        }
 
         // Goki's intro animation/sequence (from original code)
         const gokiBossData = { ...globals.resources.recipe.data.bossData.bossExtra }; // Goki is 'bossExtra'
@@ -2267,27 +2282,7 @@ export class GameScene extends BaseScene {
     }
 
     // --- Event Handlers ---
-    handlePlayerShoot(bulletsData) {
-        bulletsData.forEach(data => {
-            const bullet = new Bullet(data);
-            bullet.position.set(this.player.x + data.startX, this.player.y + data.startY);
-            bullet.rotation = data.rotation; // Set initial rotation
-
-            // Listen for bullet death to remove it
-            bullet.on(Bullet.CUSTOM_EVENT_DEAD_COMPLETE, () => {
-                const index = this.playerBullets.indexOf(bullet);
-                if (index > -1) {
-                    this.removePlayerBullet(bullet, index);
-                } else {
-                    // Bullet might already be removed, log warning if needed
-                    // Utils.dlog("Attempted to remove already removed player bullet:", bullet.id);
-                }
-            });
-
-            this.bulletContainer.addChild(bullet);
-            this.playerBullets.push(bullet);
-        });
-    }
+    // handlePlayerShoot removed - Player now creates and manages bullets directly as children
 
     handleEnemyShoot(enemyContext) {
         const bulletData = { ...enemyContext.tamaData }; // Clone base data
@@ -2460,8 +2455,16 @@ export class GameScene extends BaseScene {
         this.hud.caBtnDeactive(true); // Deactivate CA button permanently for the stage
 
         // Stop player shooting and clear bullets
-        if (this.player) this.player.shootStop();
-        this.playerBullets.forEach(b => this.removePlayerBullet(b, -1));
+        if (this.player) {
+            this.player.shootStop();
+            // Clear player bullets (managed by player now)
+            if (this.player.bulletList) {
+                [...this.player.bulletList].forEach(b => {
+                    this.player.bulletRemove(b);
+                    this.player.bulletRemoveComplete(b);
+                });
+            }
+        }
         this.enemyBullets.forEach(b => this.removeEnemyBullet(b, -1));
 
         // Boss death animation is handled within the Boss class 'dead' method
@@ -2524,7 +2527,8 @@ export class GameScene extends BaseScene {
     }
 
     removePlayerBullet(bullet, index) {
-        this.removeEntity(bullet, this.playerBullets, index);
+        // No longer used - Player manages its own bullets
+        // this.removeEntity(bullet, this.playerBullets, index);
     }
 
     removeEnemyBullet(bullet, index) {
@@ -2564,8 +2568,13 @@ export class GameScene extends BaseScene {
         if (this.boss) this.boss.onTheWorld(true); // Freeze boss
         if (this.player) this.player.shootStop(); // Stop player shooting
 
-        // Clear existing bullets (optional, depends on design)
-        this.playerBullets.forEach(b => this.removePlayerBullet(b, -1));
+        // Clear existing bullets (managed by player now)
+        if (this.player && this.player.bulletList) {
+            [...this.player.bulletList].forEach(b => {
+                this.player.bulletRemove(b);
+                this.player.bulletRemoveComplete(b);
+            });
+        }
         // Consider clearing enemy bullets too?
         // this.enemyBullets.forEach(b => this.removeEnemyBullet(b, -1));
 
@@ -2789,7 +2798,7 @@ export class GameScene extends BaseScene {
         // Clear arrays
         this.enemies = [];
         this.items = [];
-        this.playerBullets = [];
+        // this.playerBullets = []; // No longer used - Player manages its own bullets
         this.enemyBullets = [];
         this.stageEnemyPositionList = [];
 
