@@ -885,7 +885,8 @@ export class Player extends BaseUnit {
         }
 
          // Smooth movement towards target using lerp (linear interpolation)
-         const lerpFactor = 0.09 * delta * 60; // Adjust lerp factor based on delta
+         // Delta is typically 1.0 at 60fps, so we just use 0.09 as the lerp factor
+         const lerpFactor = 0.09; // Keep constant for smooth movement
          this.x += lerpFactor * (this.unitX - this.x);
          // Player Y is usually fixed or handled differently, lerping might not be desired
          // this.y += lerpFactor * (this.unitY - this.y);
