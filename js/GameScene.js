@@ -2379,8 +2379,9 @@ export class GameScene extends BaseScene {
                     enemyContext.x + enemyContext.unit.hitArea.x + enemyContext.unit.hitArea.width / 2 - bullet.unit.width / 2,
                     enemyContext.y + enemyContext.unit.hitArea.y + enemyContext.unit.hitArea.height / 2 // Center Y? Or bottom?
                 );
-                // Determine bullet direction (e.g., towards player or straight down)
-                bullet.rotation = 90 * Math.PI / 180; // Straight down
+                // Set movement direction and visual rotation
+                bullet.rotation = 90 * Math.PI / 180; // Straight down (movement direction)
+                bullet.character.rotation = -Math.PI / 2; // Rotate sprite 90 degrees CCW to point down
                 bullet.speed = bulletData.speed || 3; // Use default speed if not specified
 
                 bullet.on(Bullet.CUSTOM_EVENT_DEAD_COMPLETE, () => this.removeEnemyBulletById(bullet.id));
