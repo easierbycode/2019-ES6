@@ -849,6 +849,9 @@ export class Player extends BaseUnit {
      }
 
     updateTargetX(globalX) {
+        if (!this.parent) {
+            return;
+        }
          const halfHitboxWidth = this.unit.hitArea.width / 2;
          // Adjust target based on the object's center, not the global X directly
          let target = globalX - this.parent.x; // Adjust for container position if player is nested
@@ -861,7 +864,6 @@ export class Player extends BaseUnit {
     // --- Game Loop ---
     loop(delta) {
          if (this.deadFlg) return;
-
         // --- Movement ---
         if (this.keyDownFlg) {
             const moveSpeed = 6 * delta; // Adjust speed based on delta
