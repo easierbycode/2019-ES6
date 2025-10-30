@@ -786,6 +786,7 @@ export class Player extends BaseUnit {
         // --- Event Listeners ---
         this.keyDownListener = this.onKeyDown.bind(this);
         this.keyUpListener = this.onKeyUp.bind(this);
+        this._listenersAttached = false; // Flag to track listener state
 
          // Adjust hitArea based on actual sprite size
          this.unit.hitArea = new PIXI.Rectangle(
@@ -808,17 +809,19 @@ export class Player extends BaseUnit {
     // --- Input Handling ---
     // These should be attached/detached by the scene managing the player
     attachInputListeners() {
-        if (typeof document !== 'undefined') {
-            document.addEventListener("keydown", this.keyDownListener);
-            document.addEventListener("keyup", this.keyUpListener);
-        }
+        if (this._listenersAttached || typeof document === 'undefined') return; // Don't attach multiple times
+        console.log("Attaching Player keyboard listeners.");
+        document.addEventListener("keydown", this.keyDownListener);
+        document.addEventListener("keyup", this.keyUpListener);
+        this._listenersAttached = true;
     }
 
     detachInputListeners() {
-        if (typeof document !== 'undefined') {
-            document.removeEventListener("keydown", this.keyDownListener);
-            document.removeEventListener("keyup", this.keyUpListener);
-        }
+        if (!this._listenersAttached || typeof document === 'undefined') return; // Don't detach if not attached
+        console.log("Detaching Player keyboard listeners.");
+        document.removeEventListener("keydown", this.keyDownListener);
+        document.removeEventListener("keyup", this.keyUpListener);
+        this._listenersAttached = false;
     }
 
      // Pointer events should be handled by the scene's input layer

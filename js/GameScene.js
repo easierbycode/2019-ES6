@@ -1736,16 +1736,29 @@ export class GameScene extends BaseScene {
 
         // --- Setup Input Handling for Player ---
         // Add a transparent interactive graphic covering the game area
-        this.inputLayer = new PIXI.Graphics();
-        this.inputLayer.beginFill(0xFFFFFF, 0); // Transparent
-        this.inputLayer.drawRect(0, 0, Constants.GAME_DIMENSIONS.WIDTH, Constants.GAME_DIMENSIONS.HEIGHT);
-        this.inputLayer.endFill();
-        this.inputLayer.interactive = true;
+        if (!this.inputLayer) {
+            this.inputLayer = new PIXI.Graphics();
+            this.inputLayer.beginFill(0xFFFFFF, 0); // Transparent
+            this.inputLayer.drawRect(0, 0, Constants.GAME_DIMENSIONS.WIDTH, Constants.GAME_DIMENSIONS.HEIGHT);
+            this.inputLayer.endFill();
+            this.inputLayer.interactive = true;
+            this.addChild(this.inputLayer); // Add on top, but behind HUD/Overlays potentially
+            console.log("Input Layer created");
+        } else {
+            // Clear existing listeners before re-attaching
+            this.inputLayer.removeAllListeners('pointerdown');
+            this.inputLayer.removeAllListeners('pointermove');
+            this.inputLayer.removeAllListeners('pointerup');
+            this.inputLayer.removeAllListeners('pointerupoutside');
+            this.inputLayer.interactive = true;
+            console.log("Input Layer reused, listeners cleared");
+        }
+
+        // Attach listeners to the inputLayer
         this.inputLayer.on('pointerdown', this.player.onScreenDragStart, this.player);
         this.inputLayer.on('pointermove', this.player.onScreenDragMove, this.player);
         this.inputLayer.on('pointerup', this.player.onScreenDragEnd, this.player);
         this.inputLayer.on('pointerupoutside', this.player.onScreenDragEnd, this.player);
-        this.addChild(this.inputLayer); // Add on top, but behind HUD/Overlays potentially
         this.setChildIndex(this.inputLayer, this.children.length - 3); // Place behind HUD and Overlay containers
 
         this.player.attachInputListeners(); // Attach keyboard listeners
