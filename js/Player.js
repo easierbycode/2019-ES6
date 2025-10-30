@@ -919,7 +919,7 @@ export class Player extends BaseUnit {
                  const bullet = new Bullet(this.shootNormalData);
                  const rotation = 270 * Math.PI / 180; // -90 degrees for upward movement
                  bullet.rotation = rotation; // Movement direction
-                 bullet.unit.rotation = rotation; // Visual rotation
+                 bullet.character.rotation = rotation; // Visual rotation (rotate sprite to face up)
                  bullet.unit.x = this.unit.x + 5 * Math.sin(rotation) + 14;
                  bullet.unit.y = this.unit.y + 5 * Math.sin(rotation) + 11;
                  bullet.name = SHOOT_MODES.NORMAL;
@@ -938,7 +938,7 @@ export class Player extends BaseUnit {
                  const bullet = new Bullet(this.shootBigData);
                  const rotation = 270 * Math.PI / 180; // -90 degrees for upward movement
                  bullet.rotation = rotation; // Movement direction
-                 bullet.unit.rotation = rotation; // Visual rotation
+                 bullet.character.rotation = rotation; // Visual rotation (rotate sprite to face up)
                  bullet.unit.x = this.unit.x + 5 * Math.sin(rotation) + 10;
                  bullet.unit.y = this.unit.y + 5 * Math.sin(rotation) + 22;
                  bullet.name = SHOOT_MODES.BIG;
@@ -960,19 +960,19 @@ export class Player extends BaseUnit {
                      if (i === 0) {
                          rotation = 280 * Math.PI / 180;
                          bullet.rotation = rotation; // Movement direction
-                         bullet.unit.rotation = rotation; // Visual rotation
+                         bullet.character.rotation = rotation; // Visual rotation
                          bullet.unit.x = this.unit.x + 5 * Math.cos(rotation) + 14;
                          bullet.unit.y = this.unit.y + 5 * Math.sin(rotation) + 11;
                      } else if (i === 1) {
                          rotation = 270 * Math.PI / 180;
                          bullet.rotation = rotation; // Movement direction
-                         bullet.unit.rotation = rotation; // Visual rotation
+                         bullet.character.rotation = rotation; // Visual rotation
                          bullet.unit.x = this.unit.x + 5 * Math.cos(rotation) + 10;
                          bullet.unit.y = this.unit.y + 5 * Math.sin(rotation) + 11;
                      } else if (i === 2) {
                          rotation = 260 * Math.PI / 180;
                          bullet.rotation = rotation; // Movement direction
-                         bullet.unit.rotation = rotation; // Visual rotation
+                         bullet.character.rotation = rotation; // Visual rotation
                          bullet.unit.x = this.unit.x + 5 * Math.cos(rotation) + 6;
                          bullet.unit.y = this.unit.y + 5 * Math.sin(rotation) + 11;
                      }

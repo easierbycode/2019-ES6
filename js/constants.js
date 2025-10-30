@@ -120,6 +120,7 @@ export const LANG = (() => {
 export const BASE_PATH = (() => {
     // Check if running in browser environment
     if (typeof window === 'undefined') {
+        console.log('[BASE_PATH] Not in browser environment, using "/"');
         return "/"; // Default for non-browser environments
     }
 
@@ -130,6 +131,7 @@ export const BASE_PATH = (() => {
             try {
                 const domainRemoved = baseUrlFromWindow.replace(/^https?\:\/\/[^\/]+/, "");
                 const apiRemoved = domainRemoved.replace(/\/api\/$/, "");
+                console.log(`[BASE_PATH] Using window.baseUrl: "${apiRemoved}"`);
                 return apiRemoved;
             } catch (e) {
                 console.error("Error processing window.baseUrl:", e);
@@ -142,6 +144,8 @@ export const BASE_PATH = (() => {
     const hostname = window.location.hostname;
     const pathname = window.location.pathname;
 
+    console.log(`[BASE_PATH] Detecting: hostname="${hostname}", pathname="${pathname}"`);
+
     if (hostname.endsWith('.github.io') || hostname === 'localhost' || hostname === '127.0.0.1') {
         // Extract the first path segment (repository name for GitHub Pages)
         const match = pathname.match(/^\/([^\/]+)/);
@@ -150,14 +154,21 @@ export const BASE_PATH = (() => {
             const repoName = match[1];
             // Exclude common local dev patterns
             if (hostname !== 'localhost' && hostname !== '127.0.0.1') {
+                console.log(`[BASE_PATH] GitHub Pages detected, using: "/${repoName}/"`);
                 return `/${repoName}/`;
+            } else {
+                console.log(`[BASE_PATH] Localhost detected with path segment "${repoName}", using: "/"`);
             }
         }
     }
 
     // Default to root path for local development
+    console.log('[BASE_PATH] Using default: "/"');
     return "/";
 })();
+
+// Log the final BASE_PATH value
+console.log(`[BASE_PATH] Final value: "${BASE_PATH}"`);
 
 export const BGM_INFO = {
     adventure_bgm: "assets/sounds/scene_adventure/adventure_bgm.mp3",
