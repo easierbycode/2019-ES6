@@ -1639,7 +1639,8 @@ export class GameScene extends BaseScene {
 
 
         this.player = new Player(playerData);
-        // Player now manages its own bullets directly - no event needed
+        // Listen for player bullet creation events
+        this.player.on(Player.CUSTOM_EVENT_BULLET_ADD, this.handlePlayerShoot.bind(this));
         this.player.on(Player.CUSTOM_EVENT_DEAD, this.gameover.bind(this));
         this.player.on(Player.CUSTOM_EVENT_DEAD_COMPLETE, this.gameoverComplete.bind(this));
         gameState.playerRef = this.player; // Update global reference
@@ -1935,6 +1936,26 @@ export class GameScene extends BaseScene {
 
                 if (hitTest(bullet.unit, this.player.unit)) {
                     this.handleEnemyBulletHitPlayer(bullet, i);
+                }
+            }
+        }
+
+        // Player Bullets vs Enemy Bullets
+        if (this.player && this.player.bulletList) {
+            for (let i = this.player.bulletList.length - 1; i >= 0; i--) {
+                const playerBullet = this.player.bulletList[i];
+                if (playerBullet.deadFlg) continue;
+
+                for (let j = this.enemyBullets.length - 1; j >= 0; j--) {
+                    const enemyBullet = this.enemyBullets[j];
+                    if (enemyBullet.deadFlg) continue;
+
+                    if (hitTest(playerBullet.unit, enemyBullet.unit)) {
+                        // Both bullets take damage and are destroyed
+                        playerBullet.onDamage(Infinity);
+                        enemyBullet.onDamage(Infinity);
+                        break; // Player bullet is destroyed, move to next player bullet
+                    }
                 }
             }
         }
@@ -2296,7 +2317,29 @@ export class GameScene extends BaseScene {
     }
 
     // --- Event Handlers ---
-    // handlePlayerShoot removed - Player now creates and manages bullets directly as children
+    handlePlayerShoot(bullets) {
+        if (!bullets || bullets.length === 0) return;
+
+        bullets.forEach(bullet => {
+            // Convert bullet position from player-relative to world coordinates
+            const worldPos = this.player.toGlobal(new PIXI.Point(bullet.unit.x, bullet.unit.y));
+            bullet.x = worldPos.x;
+            bullet.y = worldPos.y;
+
+            // Add to bulletContainer instead of player
+            this.bulletContainer.addChild(bullet);
+
+            // Listen for bullet death to remove it
+            bullet.on(BaseUnit.CUSTOM_EVENT_DEAD_COMPLETE, () => {
+                const index = this.player.bulletList.findIndex(b => b.id === bullet.id);
+                if (index > -1) {
+                    this.player.bulletList.splice(index, 1);
+                }
+                this.bulletContainer.removeChild(bullet);
+                bullet.destroy();
+            });
+        });
+    }
 
     handleEnemyShoot(enemyContext) {
         const bulletData = { ...enemyContext.tamaData }; // Clone base data

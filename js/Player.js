@@ -685,6 +685,8 @@ import * as Utils from './utils.js'; // Ensure Utils is imported
 // }
 
 export class Player extends BaseUnit {
+    static CUSTOM_EVENT_BULLET_ADD = "playerBulletAdd";
+
     constructor(data) {
         console.log("Player constructor called");
         // --- Texture Pre-processing ---
@@ -925,6 +927,8 @@ export class Player extends BaseUnit {
 
     // --- Shooting Logic ---
     shoot() {
+        const bullets = [];
+
         switch (this.shootMode) {
             case SHOOT_MODES.NORMAL:
                 {
@@ -936,9 +940,7 @@ export class Player extends BaseUnit {
                     bullet.id = this.bulletIdCnt++;
                     bullet.shadowReverse = false;
                     bullet.shadowOffsetY = 0;
-                    bullet.on(BaseUnit.CUSTOM_EVENT_DEAD, this.bulletRemove.bind(this, bullet));
-                    bullet.on(BaseUnit.CUSTOM_EVENT_DEAD_COMPLETE, this.bulletRemoveComplete.bind(this, bullet));
-                    this.addChild(bullet);
+                    bullets.push(bullet);
                     this.bulletList.push(bullet);
                     Sound.stop('se_shoot');
                     Sound.play('se_shoot');
@@ -954,9 +956,7 @@ export class Player extends BaseUnit {
                     bullet.id = this.bulletIdCnt++;
                     bullet.shadowReverse = false;
                     bullet.shadowOffsetY = 0;
-                    bullet.on(BaseUnit.CUSTOM_EVENT_DEAD, this.bulletRemove.bind(this, bullet));
-                    bullet.on(BaseUnit.CUSTOM_EVENT_DEAD_COMPLETE, this.bulletRemoveComplete.bind(this, bullet));
-                    this.addChild(bullet);
+                    bullets.push(bullet);
                     this.bulletList.push(bullet);
                     Sound.stop('se_shoot_b');
                     Sound.play('se_shoot_b');
@@ -982,9 +982,7 @@ export class Player extends BaseUnit {
                         bullet.id = this.bulletIdCnt++;
                         bullet.shadowReverse = false;
                         bullet.shadowOffsetY = 0;
-                        bullet.on(BaseUnit.CUSTOM_EVENT_DEAD, this.bulletRemove.bind(this, bullet));
-                        bullet.on(BaseUnit.CUSTOM_EVENT_DEAD_COMPLETE, this.bulletRemoveComplete.bind(this, bullet));
-                        this.addChild(bullet);
+                        bullets.push(bullet);
                         this.bulletList.push(bullet);
                     }
                     Sound.stop('se_shoot');
@@ -992,20 +990,13 @@ export class Player extends BaseUnit {
                     break;
                 }
         }
+
+        // Emit event with bullet objects for GameScene to add to bulletContainer
+        this.emit(Player.CUSTOM_EVENT_BULLET_ADD, bullets);
     }
 
-    bulletRemove(bullet) {
-        for (let i = 0; i < this.bulletList.length; i++) {
-            if (bullet.id === this.bulletList[i].id) {
-                this.bulletList.splice(i, 1);
-                break;
-            }
-        }
-    }
-
-    bulletRemoveComplete(bullet) {
-        this.removeChild(bullet);
-    }
+    // Bullet management now handled by GameScene
+    // bulletRemove and bulletRemoveComplete methods no longer needed
 
     updateShootData() {
          switch (this.shootMode) {
