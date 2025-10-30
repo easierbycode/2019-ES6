@@ -686,6 +686,7 @@ import * as Utils from './utils.js'; // Ensure Utils is imported
 
 export class Player extends BaseUnit {
     constructor(data) {
+        console.log("Player constructor called");
         // --- Texture Pre-processing ---
         // This should ideally happen ONCE during loading, not in constructor
         const processTextures = (texturePaths) => {
@@ -1214,6 +1215,7 @@ export class Player extends BaseUnit {
 
      // Override destroy for thorough cleanup
      destroy(options) {
+        console.log("Player destroy called");
          this.detachInputListeners();
          if (this.barrier) this.barrier.destroy();
          if (this.barrierEffect) this.barrierEffect.destroy();
