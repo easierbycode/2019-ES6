@@ -389,6 +389,7 @@ export class Bullet extends BaseUnit {
         this.deadFlg = true;
         this.emit(BaseUnit.CUSTOM_EVENT_DEAD); // Notify manager
 
+        this.unit.visible = false;      // Hide unit (prevents collision detection)
         this.character.visible = false; // Hide character
         this.shadow.visible = false;    // Hide shadow
 
