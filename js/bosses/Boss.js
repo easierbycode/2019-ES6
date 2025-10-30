@@ -197,6 +197,7 @@ export class Boss extends BaseUnit {
         this.shootOn = false; // Stop trying to start new attack patterns
         this.emit(BaseUnit.CUSTOM_EVENT_DEAD, this); // Notify manager
 
+        if (this.unit) this.unit.visible = false; // Hide unit immediately (prevents collision)
         this.character?.stop();
         this.shadow?.stop();
         this.tlShoot?.kill(); // Stop attack patterns
@@ -226,8 +227,8 @@ export class Boss extends BaseUnit {
         }
 
 
-        // Fade out the main unit container (character + shadow) after shaking/explosions start
-        TweenMax.to(this.unit, 1.0, { delay: 0.5, alpha: 0 });
+        // Unit is already hidden to prevent collision
+        // Explosions are added to main container instead of unit
 
         this.onDead(); // Hook for subclasses (e.g., play specific KO voice)
     }
@@ -251,7 +252,7 @@ export class Boss extends BaseUnit {
             explosionInstance.destroy(); // Clean up clone
          };
 
-         this.unit.addChild(explosionInstance); // Add explosions to the unit container
+         this.addChild(explosionInstance); // Add explosions to main container (not unit, since unit is hidden)
          explosionInstance.play();
          Sound.play('se_explosion');
      }
@@ -260,8 +261,7 @@ export class Boss extends BaseUnit {
         this.explotionCnt++;
         if (isVeryLast) {
             // Only emit DEAD_COMPLETE after the final explosion finishes
-             if(this.unit) this.unit.visible = false; // Ensure unit is hidden
-             this.visible = false;
+            this.visible = false;
             this.emit(BaseUnit.CUSTOM_EVENT_DEAD_COMPLETE, this);
         }
     }

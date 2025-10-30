@@ -291,6 +291,7 @@ export class Enemy extends BaseUnit {
         Utils.dlog(`Enemy ${this.name} [ID:${this.id}] dead, emitting DEAD event.`);
         this.emit(BaseUnit.CUSTOM_EVENT_DEAD, this); // Notify manager, pass self
 
+        if (this.unit) this.unit.visible = false;        // Hide unit (prevents collision detection)
         if (this.character) this.character.visible = false; // Hide main sprite
         if (this.shadow) this.shadow.visible = false;    // Hide shadow
 
