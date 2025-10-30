@@ -2774,33 +2774,25 @@ export class GameScene extends BaseScene {
     // Override destroy for thorough cleanup
     destroy(options) {
         Utils.dlog(`Destroying GameScene - Stage ${gameState.stageId}`);
-        // Stop all sounds associated with this scene
         if (this.stageBgmName) Sound.stop(this.stageBgmName);
 
-        // Kill all tweens targetting objects in this scene
         TweenMax.killTweensOf(this);
         if (this.player) TweenMax.killTweensOf(this.player);
         if (this.boss) TweenMax.killTweensOf(this.boss);
-        // etc. for other animated elements
 
-        // Ensure player listeners are removed
-        if (this.player) {
-            this.player.detachInputListeners();
-            // Player destroy called by PIXI cascade
-        }
+        if (this.player) this.player.detachInputListeners();
         if (this.inputLayer) {
-            this.inputLayer.off('pointerdown');
-            this.inputLayer.off('pointermove');
-            this.inputLayer.off('pointerup');
-            this.inputLayer.off('pointerupoutside');
-            // InputLayer destroy called by PIXI cascade
+            this.inputLayer.interactive = false;
+            this.inputLayer.off('pointerdown', this._onPointerDown);
+            this.inputLayer.off('pointermove', this._onPointerMove);
+            this.inputLayer.off('pointerup', this._onPointerUp);
+            this.inputLayer.off('pointerupoutside', this._onPointerUpOutside);
         }
-
 
         // Clear arrays
         this.enemies = [];
         this.items = [];
-        // this.playerBullets = []; // No longer used - Player manages its own bullets
+        this.playerBullets = [];
         this.enemyBullets = [];
         this.stageEnemyPositionList = [];
 
@@ -2817,8 +2809,6 @@ export class GameScene extends BaseScene {
         this.caLine = null;
         this.inputLayer = null;
 
-
-        // Call base destroy, which handles children
-        super.destroy(options);
+        super.destroy({ children: true, texture: false, baseTexture: false });
     }
 }
