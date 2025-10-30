@@ -1776,8 +1776,9 @@ export class GameScene extends BaseScene {
             for (let i = this.player.bulletList.length - 1; i >= 0; i--) {
                 const bullet = this.player.bulletList[i];
                 bullet.loop(delta);
-                // Check off-screen - bullets remove themselves via player.bulletRemove
-                if (bullet.y < -bullet.height || bullet.x < -bullet.width || bullet.x > Constants.GAME_DIMENSIONS.WIDTH) {
+                // Check off-screen using global position (bullets are children of player)
+                const globalPos = bullet.getGlobalPosition();
+                if (globalPos.y < -bullet.height || globalPos.x < -bullet.width || globalPos.x > Constants.GAME_DIMENSIONS.WIDTH + bullet.width) {
                     this.player.bulletRemove(bullet);
                     this.player.bulletRemoveComplete(bullet);
                 }
