@@ -768,6 +768,10 @@ export class Player extends BaseUnit {
         this.shadow.animationSpeed = 0.35;
         this.shadowOffsetY = 5;
 
+        // Initialize unit position (can be modified by animations like damage shake)
+        this.unit.x = 0;
+        this.unit.y = 0;
+
         this.damageAnimationFlg = false;
         this.barrierFlg = false;
         this.screenDragFlg = false;
@@ -920,6 +924,7 @@ export class Player extends BaseUnit {
                  bullet.unit.rotation = 270 * Math.PI / 180;
                  bullet.unit.x = this.unit.x + 5 * Math.sin(bullet.unit.rotation) + 14;
                  bullet.unit.y = this.unit.y + 5 * Math.sin(bullet.unit.rotation) + 11;
+                 console.log(`[Player.shoot NORMAL] player.unit: (${this.unit.x}, ${this.unit.y}), bullet.unit: (${bullet.unit.x}, ${bullet.unit.y}), player global: (${this.x}, ${this.y})`);
                  bullet.name = SHOOT_MODES.NORMAL;
                  bullet.id = this.bulletIdCnt++;
                  bullet.shadowReverse = false;
@@ -1043,6 +1048,9 @@ export class Player extends BaseUnit {
         this.character.tint = 0xFFFFFF; // Reset tint
         this.character.alpha = 1;
         this.unit.visible = true; // Ensure unit is visible
+        // Ensure unit position starts at origin (can be modified by animations like damage shake)
+        this.unit.x = 0;
+        this.unit.y = 0;
     }
 
     shootStop() {
