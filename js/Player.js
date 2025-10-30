@@ -917,11 +917,9 @@ export class Player extends BaseUnit {
          switch (this.shootMode) {
              case SHOOT_MODES.NORMAL: {
                  const bullet = new Bullet(this.shootNormalData);
-                 const rotation = 270 * Math.PI / 180; // -90 degrees for upward movement
-                 bullet.rotation = rotation; // Movement direction
-                 bullet.unit.rotation = rotation; // Visual rotation (rotate container to face up)
-                 bullet.unit.x = this.unit.x + 5 * Math.sin(rotation) + 14;
-                 bullet.unit.y = this.unit.y + 5 * Math.sin(rotation) + 11;
+                 bullet.unit.rotation = 270 * Math.PI / 180; // Rotation for movement and visual (matches app_formatted.js)
+                 bullet.unit.x = this.unit.x + 5 * Math.sin(bullet.unit.rotation) + 14;
+                 bullet.unit.y = this.unit.y + 5 * Math.sin(bullet.unit.rotation) + 11;
                  bullet.name = SHOOT_MODES.NORMAL;
                  bullet.id = this.bulletIdCnt++;
                  bullet.shadowReverse = false;
@@ -936,11 +934,9 @@ export class Player extends BaseUnit {
              }
              case SHOOT_MODES.BIG: {
                  const bullet = new Bullet(this.shootBigData);
-                 const rotation = 270 * Math.PI / 180; // -90 degrees for upward movement
-                 bullet.rotation = rotation; // Movement direction
-                 bullet.unit.rotation = rotation; // Visual rotation (rotate container to face up)
-                 bullet.unit.x = this.unit.x + 5 * Math.sin(rotation) + 10;
-                 bullet.unit.y = this.unit.y + 5 * Math.sin(rotation) + 22;
+                 bullet.unit.rotation = 270 * Math.PI / 180; // Rotation for movement and visual (matches app_formatted.js)
+                 bullet.unit.x = this.unit.x + 5 * Math.sin(bullet.unit.rotation) + 10;
+                 bullet.unit.y = this.unit.y + 5 * Math.sin(bullet.unit.rotation) + 22;
                  bullet.name = SHOOT_MODES.BIG;
                  bullet.id = this.bulletIdCnt++;
                  bullet.shadowReverse = false;
@@ -956,25 +952,18 @@ export class Player extends BaseUnit {
              case SHOOT_MODES.THREE_WAY: {
                  for (let i = 0; i < 3; i++) {
                      const bullet = new Bullet(this.shoot3wayData);
-                     let rotation;
                      if (i === 0) {
-                         rotation = 280 * Math.PI / 180;
-                         bullet.rotation = rotation; // Movement direction
-                         bullet.unit.rotation = rotation; // Visual rotation
-                         bullet.unit.x = this.unit.x + 5 * Math.cos(rotation) + 14;
-                         bullet.unit.y = this.unit.y + 5 * Math.sin(rotation) + 11;
+                         bullet.unit.rotation = 280 * Math.PI / 180;
+                         bullet.unit.x = this.unit.x + 5 * Math.cos(bullet.unit.rotation) + 14;
+                         bullet.unit.y = this.unit.y + 5 * Math.sin(bullet.unit.rotation) + 11;
                      } else if (i === 1) {
-                         rotation = 270 * Math.PI / 180;
-                         bullet.rotation = rotation; // Movement direction
-                         bullet.unit.rotation = rotation; // Visual rotation
-                         bullet.unit.x = this.unit.x + 5 * Math.cos(rotation) + 10;
-                         bullet.unit.y = this.unit.y + 5 * Math.sin(rotation) + 11;
+                         bullet.unit.rotation = 270 * Math.PI / 180;
+                         bullet.unit.x = this.unit.x + 5 * Math.cos(bullet.unit.rotation) + 10;
+                         bullet.unit.y = this.unit.y + 5 * Math.sin(bullet.unit.rotation) + 11;
                      } else if (i === 2) {
-                         rotation = 260 * Math.PI / 180;
-                         bullet.rotation = rotation; // Movement direction
-                         bullet.unit.rotation = rotation; // Visual rotation
-                         bullet.unit.x = this.unit.x + 5 * Math.cos(rotation) + 6;
-                         bullet.unit.y = this.unit.y + 5 * Math.sin(rotation) + 11;
+                         bullet.unit.rotation = 260 * Math.PI / 180;
+                         bullet.unit.x = this.unit.x + 5 * Math.cos(bullet.unit.rotation) + 6;
+                         bullet.unit.y = this.unit.y + 5 * Math.sin(bullet.unit.rotation) + 11;
                      }
                      bullet.id = this.bulletIdCnt++;
                      bullet.shadowReverse = false;

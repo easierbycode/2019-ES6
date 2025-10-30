@@ -100,10 +100,10 @@ export class _Bullet extends BaseUnit {
                  this.y += (Math.cos(this.cont / 5) + 2.5 * this.speed) * delta;
             }
         } else {
-             // Standard bullet movement (e.g., upwards for player, downwards for enemy)
-             // Assuming rotation is set correctly externally
-             this.x += Math.cos(this.rotation) * this.speed * delta;
-             this.y += Math.sin(this.rotation) * this.speed * delta;
+             // Standard bullet movement using unit.rotation (matches app_formatted.js)
+             // Movement based on unit.rotation like original: e.unit.x += 3.5 * Math.cos(e.unit.rotation)
+             this.unit.x += this.speed * Math.cos(this.unit.rotation) * delta;
+             this.unit.y += this.speed * Math.sin(this.unit.rotation) * delta;
         }
 
          // Off-screen check should be handled by the scene managing the bullets
@@ -321,10 +321,10 @@ export class Bullet extends BaseUnit {
                  this.y += (Math.cos(this.cont / 5) + 2.5 * this.speed) * delta;
             }
         } else {
-             // Standard bullet movement (e.g., upwards for player, downwards for enemy)
-             // Assuming rotation is set correctly externally
-             this.x += Math.cos(this.rotation) * this.speed * delta;
-             this.y += Math.sin(this.rotation) * this.speed * delta;
+             // Standard bullet movement using unit.rotation (matches app_formatted.js)
+             // Movement based on unit.rotation like original: e.unit.x += 3.5 * Math.cos(e.unit.rotation)
+             this.unit.x += this.speed * Math.cos(this.unit.rotation) * delta;
+             this.unit.y += this.speed * Math.sin(this.unit.rotation) * delta;
         }
 
          // Off-screen check should be handled by the scene managing the bullets
