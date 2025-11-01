@@ -356,8 +356,9 @@ export class Bullet extends BaseUnit {
                  // Don't remove child here, let the manager do it on deadComplete
             };
 
-            this.explosion.x = this.character.x; // Position relative to character
-            this.explosion.y = this.character.y - 10; // Offset slightly up
+            this.explosion.x = this.unit.x; // Position at current unit location
+            this.explosion.y = this.unit.y - 10; // Offset slightly up
+            this.explosion.rotation = -Math.PI / 2; // Rotate 90 degrees CCW
 
              if (hitType === 'infinity' && this.guardTexture) { // Check if guardTexture exists
                  this.explosion.textures = this.guardTexture;
@@ -396,8 +397,9 @@ export class Bullet extends BaseUnit {
         if (this.explosion && hitType !== 'infinity') { // Don't show explosion on guard hit
             this.explosion.visible = true;
             this.explosion.onComplete = () => this.explosionComplete();
-            this.explosion.x = this.character.x;
-            this.explosion.y = this.character.y - 10;
+            this.explosion.x = this.unit.x; // Position at current unit location
+            this.explosion.y = this.unit.y - 10; // Offset slightly up
+            this.explosion.rotation = -Math.PI / 2; // Rotate 90 degrees CCW
             this.explosion.gotoAndPlay(0);
         } else {
             // If no explosion or guard hit, complete immediately
