@@ -358,7 +358,7 @@ export class GameScene extends BaseScene {
 
         // Boss Timer Logic
         if (this.bossTimerStartFlg && this.boss) {
-            this.bossTimerFrameCnt += delta * Constants.FPS;
+            this.bossTimerFrameCnt += delta;
             if (this.bossTimerFrameCnt >= Constants.FPS) { // Every second approx
                 this.bossTimerFrameCnt = 0;
                 this.bossTimerCountDown--;
