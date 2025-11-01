@@ -235,6 +235,19 @@ export class Player extends BaseUnit {
         } else if (this.shootOn && this.bulletFrameCnt % shootInterval === 0) {
             this.shoot();
         }
+
+        // Update and cleanup bullets (from app_formatted.js lines 888-894)
+        for (let i = this.bulletList.length - 1; i >= 0; i--) {
+            const bullet = this.bulletList[i];
+            bullet.unit.x += 3.5 * Math.cos(bullet.unit.rotation);
+            bullet.unit.y += 3.5 * Math.sin(bullet.unit.rotation);
+
+            // Remove bullets that go off-screen
+            if (bullet.unit.y <= 40 || bullet.unit.x <= -bullet.unit.width || bullet.unit.x >= Constants.GAME_DIMENSIONS.WIDTH) {
+                this.bulletRemove(bullet);
+                this.bulletRemoveComplete(bullet);
+            }
+        }
     }
 
      // Override BaseUnit's updateShadowPosition if Player's shadow behaves differently

@@ -239,7 +239,7 @@ export class Boss extends BaseUnit {
 
          // Clone the explosion sprite for multiple instances
          const explosionInstance = new PIXI.extras.AnimatedSprite(this.explosion.textures);
-         explosionInstance.scale.copyFrom(this.explosion.scale); // Use pre-calculated scale
+         explosionInstance.scale.set(this.explosion.scale.x, this.explosion.scale.y); // Use pre-calculated scale
          explosionInstance.animationSpeed = this.explosion.animationSpeed;
          explosionInstance.loop = false;
          explosionInstance.anchor.set(0.5);

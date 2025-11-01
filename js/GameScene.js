@@ -289,20 +289,7 @@ export class GameScene extends BaseScene {
 
         // Player Loop (already handles movement, shooting logic internally)
         // Player's loop is called by BaseScene's loop if it exists
-
-        // Update Player Bullets (managed by player now)
-        if (this.player && this.player.bulletList) {
-            for (let i = this.player.bulletList.length - 1; i >= 0; i--) {
-                const bullet = this.player.bulletList[i];
-                bullet.loop(delta);
-                // Check off-screen using global position (bullets are children of player)
-                const globalPos = bullet.getGlobalPosition();
-                if (globalPos.y < -bullet.height || globalPos.x < -bullet.width || globalPos.x > Constants.GAME_DIMENSIONS.WIDTH + bullet.width) {
-                    this.player.bulletRemove(bullet);
-                    this.player.bulletRemoveComplete(bullet);
-                }
-            }
-        }
+        // Player bullets are updated and cleaned up in Player.loop()
 
         // Update Enemy Bullets
         for (let i = this.enemyBullets.length - 1; i >= 0; i--) {
@@ -417,11 +404,11 @@ export class GameScene extends BaseScene {
         if (this.player && this.player.bulletList) {
             for (let i = this.player.bulletList.length - 1; i >= 0; i--) {
                 const bullet = this.player.bulletList[i];
-                if (bullet.deadFlg) continue;
+                if (!bullet || bullet.deadFlg) continue;
 
                 for (let j = this.enemies.length - 1; j >= 0; j--) {
                     const enemy = this.enemies[j];
-                    if (enemy.deadFlg) continue;
+                    if (!enemy || enemy.deadFlg) continue;
 
                     // Check visibility and basic distance? Optional optimization
                     // if (!enemy.visible || Math.abs(bullet.x - enemy.x) > 100) continue;
