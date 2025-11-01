@@ -145,8 +145,7 @@ export class GameScene extends BaseScene {
 
 
         this.player = new Player(playerData);
-        // Listen for player bullet creation events
-        this.player.on(Player.CUSTOM_EVENT_BULLET_ADD, this.handlePlayerShoot.bind(this));
+        // Bullets are now managed by Player directly (no need for CUSTOM_EVENT_BULLET_ADD handler)
         this.player.on(Player.CUSTOM_EVENT_DEAD, this.gameover.bind(this));
         this.player.on(Player.CUSTOM_EVENT_DEAD_COMPLETE, this.gameoverComplete.bind(this));
         gameState.playerRef = this.player; // Update global reference
