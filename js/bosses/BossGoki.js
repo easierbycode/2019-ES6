@@ -17,7 +17,7 @@ export class BossGoki extends Boss {
         };
         const explosionFrames = data.explosion;
 
-        // Process TamaData textures
+        // Process bulletData textures
          if (data.tamaDataA?.texture && !(data.tamaDataA.texture[0] instanceof PIXI.Texture)) {
              data.tamaDataA.texture = data.tamaDataA.texture.map(f => PIXI.Texture.from(f));
              if(explosionFrames) data.tamaDataA.explosion = explosionFrames; // Add explosion for bullet hits
@@ -33,7 +33,7 @@ export class BossGoki extends Boss {
         // --- Goki Specific Setup ---
         this.tamaDataA = data.tamaDataA; // Gohadoken data
         this.tamaDataB = data.tamaDataB; // Zanku Hadoken data
-        this.tamaData = this.tamaDataA; // Default
+        this.bulletData = this.tamaDataA; // Default
 
         this.unit.hitArea = new PIXI.Rectangle(
              -this.character.width / 2 + 15, -this.character.height / 2 + 20,
@@ -92,7 +92,7 @@ export class BossGoki extends Boss {
         const patternRoll = Math.random();
 
         if (patternRoll < 0.35) { // Rapid Gohadoken (High)
-            this.tamaData = this.tamaDataA;
+            this.bulletData = this.tamaDataA;
             this.tlShoot
                 .to(this, 0.4, { x: targetX })
                 .addCallback(this.playShootAAnim, "+=0")
@@ -105,7 +105,7 @@ export class BossGoki extends Boss {
                 .addCallback(this.playIdleAnim, "+=0.3");
 
         } else if (patternRoll < 0.65) { // Zanku Hadoken (Air)
-            this.tamaData = this.tamaDataB;
+            this.bulletData = this.tamaDataB;
             this.tlShoot
                 .to(this, 0.4, { x: targetX })
                 .addCallback(this.playShootBAnimAndSound, "+=0")

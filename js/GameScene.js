@@ -752,19 +752,19 @@ import { ContinueScene } from './ContinueScene.js';
 //                     } else {
 //                         enemyData.itemTexture = null;
 //                     }
-//                     // Ensure tamaData textures are processed (fallback)
-//                     if (enemyData.tamaData && Array.isArray(enemyData.tamaData.texture) && typeof enemyData.tamaData.texture[0] === 'string') {
-//                         enemyData.tamaData.texture = enemyData.tamaData.texture
+//                     // Ensure bulletData textures are processed (fallback)
+//                     if (enemyData.bulletData && Array.isArray(enemyData.bulletData.texture) && typeof enemyData.bulletData.texture[0] === 'string') {
+//                         enemyData.bulletData.texture = enemyData.bulletData.texture
 //                             .map(frame => typeof frame === 'string' ? PIXI.Texture.from(frame) : frame)
 //                             .filter(tex => tex instanceof PIXI.Texture && tex !== PIXI.Texture.EMPTY);
-//                         if (enemyData.tamaData.texture.length === 0) {
-//                             Utils.dlog(`Enemy ${enemyKey} tamaData texture processing failed or resulted in empty array.`);
-//                             enemyData.tamaData = null; // Prevent errors if textures fail
+//                         if (enemyData.bulletData.texture.length === 0) {
+//                             Utils.dlog(`Enemy ${enemyKey} bulletData texture processing failed or resulted in empty array.`);
+//                             enemyData.bulletData = null; // Prevent errors if textures fail
 //                         }
 //                     }
-//                     // Add explosion frames to tamaData if they exist
-//                     if (enemyData.tamaData) {
-//                         enemyData.tamaData.explosion = this.explosionTextures;
+//                     // Add explosion frames to bulletData if they exist
+//                     if (enemyData.bulletData) {
+//                         enemyData.bulletData.explosion = this.explosionTextures;
 //                     }
 
 
@@ -992,17 +992,17 @@ import { ContinueScene } from './ContinueScene.js';
 
 //     handleEnemyShoot(enemyContext) {
 //         Utils.dlog(`GameScene.handleEnemyShoot called by ${enemyContext && enemyContext.name}`);
-//         // Ensure tamaData exists and has texture before proceeding
-//         const enemyTamaData = enemyContext && enemyContext.tamaData;
-//         const tamaTexture = enemyTamaData && enemyTamaData.texture;
-//         if (!enemyTamaData || !tamaTexture || !Array.isArray(tamaTexture) || tamaTexture.length === 0) {
-//             Utils.dlog(`Skipping enemy shoot: Invalid tamaData for ${enemyContext && enemyContext.name}`);
+//         // Ensure bulletData exists and has texture before proceeding
+//         const enemyBulletData = enemyContext && enemyContext.bulletData;
+//         const tamaTexture = enemyBulletData && enemyBulletData.texture;
+//         if (!enemyBulletData || !tamaTexture || !Array.isArray(tamaTexture) || tamaTexture.length === 0) {
+//             Utils.dlog(`Skipping enemy shoot: Invalid bulletData for ${enemyContext && enemyContext.name}`);
 //             return; // Cannot spawn bullet without valid data
 //         }
 
 //         // Clone data and add explosion textures
-//         const tamaData = { ...enemyTamaData };
-//         tamaData.explosion = this.explosionTextures;
+//         const bulletData = { ...enemyBulletData };
+//         bulletData.explosion = this.explosionTextures;
 
 //         // --- Specific bullet logic ---
 //         const spawnBullet = (data, config = {}) => {
@@ -1044,19 +1044,19 @@ import { ContinueScene } from './ContinueScene.js';
 //         };
 
 
-//         switch (tamaData.name) {
+//         switch (bulletData.name) {
 //             case 'beam': // FANG beam
-//                 const beamCount = enemyContext.tamaData.cnt = (enemyContext.tamaData.cnt === undefined ? 0 : (enemyContext.tamaData.cnt + 1) % 3);
+//                 const beamCount = enemyContext.bulletData.cnt = (enemyContext.bulletData.cnt === undefined ? 0 : (enemyContext.bulletData.cnt + 1) % 3);
 //                 const beamAngles = [105, 90, 75];
 //                 const beamOffsets = [{ x: 121, y: 50 }, { x: 141, y: 50 }];
 //                 const beamHitAreas = [
-//                     new PIXI.Rectangle(-1.35 * tamaData.texture[0].height, -10, tamaData.texture[0].height, tamaData.texture[0].width / 2),
-//                     new PIXI.Rectangle(-0.5 * tamaData.texture[0].height, 0, tamaData.texture[0].height, tamaData.texture[0].width / 2),
-//                     new PIXI.Rectangle(-0.15 * tamaData.texture[0].height, -5, tamaData.texture[0].height, tamaData.texture[0].width / 2)
+//                     new PIXI.Rectangle(-1.35 * bulletData.texture[0].height, -10, bulletData.texture[0].height, bulletData.texture[0].width / 2),
+//                     new PIXI.Rectangle(-0.5 * bulletData.texture[0].height, 0, bulletData.texture[0].height, bulletData.texture[0].width / 2),
+//                     new PIXI.Rectangle(-0.15 * bulletData.texture[0].height, -5, bulletData.texture[0].height, bulletData.texture[0].width / 2)
 //                 ];
 //                 beamOffsets.forEach(offset => {
 //                     const angleRad = beamAngles[beamCount] * Math.PI / 180;
-//                     spawnBullet(tamaData, {
+//                     spawnBullet(bulletData, {
 //                         x: enemyContext.x + offset.x, y: enemyContext.y + offset.y,
 //                         characterRotation: angleRad, rotX: Math.cos(angleRad), rotY: Math.sin(angleRad),
 //                         hitArea: beamHitAreas[beamCount]
@@ -1065,12 +1065,12 @@ import { ContinueScene } from './ContinueScene.js';
 //                 break;
 //             case 'smoke': // FANG smoke
 //                 const smokeAngle = (60 * Math.random() + 60) * Math.PI / 180;
-//                 spawnBullet(tamaData, {
+//                 spawnBullet(bulletData, {
 //                     x: enemyContext.x + (enemyContext.unit ? enemyContext.unit.width / 2 : 0) - 50, y: enemyContext.y + 45,
 //                     rotX: Math.cos(smokeAngle), rotY: Math.sin(smokeAngle),
 //                     loop: false,
 //                     onComplete: () => { if (this.character && this.character.gotoAndPlay) this.character.gotoAndPlay(6); },
-//                     hitArea: new PIXI.Rectangle(-tamaData.texture[0].width / 2 + 20, -tamaData.texture[0].height / 2 + 20, tamaData.texture[0].width - 40, tamaData.texture[0].height - 40)
+//                     hitArea: new PIXI.Rectangle(-bulletData.texture[0].width / 2 + 20, -bulletData.texture[0].height / 2 + 20, bulletData.texture[0].width - 40, bulletData.texture[0].height - 40)
 //                 });
 //                 break;
 //             case 'meka': // FANG meka swarm
@@ -1079,7 +1079,7 @@ import { ContinueScene } from './ContinueScene.js';
 //                     const unitHitArea = enemyContext.unit && enemyContext.unit.hitArea;
 //                     const startX = enemyContext.x + (unitHitArea ? unitHitArea.x + unitHitArea.width / 2 : 0);
 //                     const startY = enemyContext.y + (unitHitArea ? unitHitArea.y + unitHitArea.height : 0);
-//                     const bullet = spawnBullet(tamaData, {
+//                     const bullet = spawnBullet(bulletData, {
 //                         x: startX,
 //                         y: startY,
 //                         start: 10 * i,
@@ -1101,7 +1101,7 @@ import { ContinueScene } from './ContinueScene.js';
 //                     const unitHitArea = enemyContext.unit && enemyContext.unit.hitArea;
 //                     const centerX = enemyContext.x + (unitHitArea ? unitHitArea.width / 2 : 0);
 //                     const centerY = enemyContext.y + (unitHitArea ? unitHitArea.height / 2 : 0);
-//                     spawnBullet(tamaData, {
+//                     spawnBullet(bulletData, {
 //                         rotX: Math.cos(angle), rotY: Math.sin(angle),
 //                         x: centerX + radius * Math.cos(angle),
 //                         y: centerY + radius * Math.sin(angle)
@@ -1109,14 +1109,14 @@ import { ContinueScene } from './ContinueScene.js';
 //                 }
 //                 break;
 //             default: // Standard bullet
-//                 Utils.dlog(`Spawning default bullet for ${enemyContext.name}. TamaData Speed: ${tamaData.speed}`);
+//                 Utils.dlog(`Spawning default bullet for ${enemyContext.name}. BulletData Speed: ${bulletData.speed}`);
 //                 const unitHitArea = enemyContext.unit && enemyContext.unit.hitArea;
-//                 const textureWidth = tamaData.texture[0] ? tamaData.texture[0].width : 10;
+//                 const textureWidth = bulletData.texture[0] ? bulletData.texture[0].width : 10;
 //                 let config = {
 //                     x: enemyContext.x + (unitHitArea ? unitHitArea.x + unitHitArea.width / 2 - textureWidth / 2 : 0),
 //                     y: enemyContext.y + (unitHitArea ? unitHitArea.y + unitHitArea.height / 2 : 0),
 //                     rotation: 90 * Math.PI / 180, // Default straight down
-//                     speed: tamaData.speed || 3
+//                     speed: bulletData.speed || 3
 //                 };
 
 //                 // AIMING Logic for soliderB
@@ -1129,7 +1129,7 @@ import { ContinueScene } from './ContinueScene.js';
 //                     Utils.dlog(`soliderB aiming at player. Angle: ${config.rotY.toFixed(2)} radians`);
 //                 }
 
-//                 spawnBullet(tamaData, config);
+//                 spawnBullet(bulletData, config);
 //                 break;
 //         }
 //     }
@@ -2152,9 +2152,9 @@ export class GameScene extends BaseScene {
                     } else {
                         enemyData.itemTexture = null;
                     }
-                    if (enemyData.tamaData?.texture && !(enemyData.tamaData.texture[0] instanceof PIXI.Texture)) {
-                        // If tamaData textures haven't been processed, do it now (fallback)
-                        enemyData.tamaData.texture = this.processFrames(enemyData.tamaData.texture[0].replace(/\d+\.gif$/, ''), enemyData.tamaData.texture.length);
+                    if (enemyData.bulletData?.texture && !(enemyData.bulletData.texture[0] instanceof PIXI.Texture)) {
+                        // If bulletData textures haven't been processed, do it now (fallback)
+                        enemyData.bulletData.texture = this.processFrames(enemyData.bulletData.texture[0].replace(/\d+\.gif$/, ''), enemyData.bulletData.texture.length);
                     }
 
 
@@ -2212,7 +2212,7 @@ export class GameScene extends BaseScene {
 
         bossData = { ...bossData }; // Clone data
         bossData.explosion = this.explosionTextures;
-        // Add any other necessary textures (tamaData, anims - ideally pre-process)
+        // Add any other necessary textures (bulletData, anims - ideally pre-process)
 
 
         this.boss = new BossClass(bossData);
@@ -2342,7 +2342,7 @@ export class GameScene extends BaseScene {
     }
 
     handleEnemyShoot(enemyContext) {
-        const bulletData = { ...enemyContext.tamaData }; // Clone base data
+        const bulletData = { ...enemyContext.bulletData }; // Clone base data
         if (!bulletData || !bulletData.texture) return; // No bullet data
 
         bulletData.explosion = this.explosionTextures; // Add explosion effect

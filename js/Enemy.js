@@ -58,23 +58,23 @@ export class Enemy extends BaseUnit {
         const explosionFrames = Array.isArray(data.explosion) ? data.explosion.filter(t => t instanceof PIXI.Texture && t !== PIXI.Texture.EMPTY) : null;
         Utils.dlog(`Enemy (${data.name || 'unknown'}) Received Explosion Frames Count: ${explosionFrames?.length}`);
 
-        // TamaData Texture Processing: Process texture paths within tamaData if they exist and are strings.
-        let processedTamaData = null;
-        if (data.tamaData) {
-            processedTamaData = { ...data.tamaData }; // Clone tamaData
-            if (processedTamaData.texture) {
-                const processedTamaTextures = processTextures(processedTamaData.texture);
-                Utils.dlog(`Enemy (${data.name || 'unknown'}) Processed Tama Frames Count: ${processedTamaTextures?.length}`);
-                processedTamaData.texture = processedTamaTextures; // Assign processed textures
-                if (!processedTamaData.texture || processedTamaData.texture.length === 0) {
-                    Utils.dlog(`Enemy (${data.name || 'unknown'}): tamaData texture processing failed or resulted in empty array.`);
-                    // Keep tamaData but with empty/null texture array, handle in shoot logic
-                    processedTamaData.texture = [];
+        // BulletData Texture Processing: Process texture paths within bulletData if they exist and are strings.
+        let processedBulletData = null;
+        if (data.bulletData) {
+            processedBulletData = { ...data.bulletData }; // Clone bulletData
+            if (processedBulletData.texture) {
+                const processedBulletTextures = processTextures(processedBulletData.texture);
+                Utils.dlog(`Enemy (${data.name || 'unknown'}) Processed Bullet Frames Count: ${processedBulletTextures?.length}`);
+                processedBulletData.texture = processedBulletTextures; // Assign processed textures
+                if (!processedBulletData.texture || processedBulletData.texture.length === 0) {
+                    Utils.dlog(`Enemy (${data.name || 'unknown'}): bulletData texture processing failed or resulted in empty array.`);
+                    // Keep bulletData but with empty/null texture array, handle in shoot logic
+                    processedBulletData.texture = [];
                 }
             }
-            // Add explosion frames to tamaData if passed from GameScene
+            // Add explosion frames to bulletData if passed from GameScene
             if (explosionFrames) {
-                processedTamaData.explosion = explosionFrames;
+                processedBulletData.explosion = explosionFrames;
             }
         }
 
@@ -102,7 +102,7 @@ export class Enemy extends BaseUnit {
         this.hp = data.hp;
         this.speed = data.speed;
         this.cagage = data.cagage; // CA Gauge fill amount
-        this.tamaData = processedTamaData; // Use the processed tamaData
+        this.bulletData = processedBulletData; // Use the processed bulletData
         this.itemName = data.itemName;
         // *** FIX: Assume data.itemTexture is already a processed array of PIXI.Texture objects ***
         this.itemTextureFrames = Array.isArray(data.itemTexture) ? data.itemTexture.filter(t => t instanceof PIXI.Texture && t !== PIXI.Texture.EMPTY) : null;
@@ -241,9 +241,9 @@ export class Enemy extends BaseUnit {
 
     shoot() {
         Utils.dlog(`Enemy ${this.name} [ID:${this.id}] attempting to shoot.`);
-        // Ensure tamaData exists and is valid before emitting
-        if (!this.tamaData || !this.tamaData.texture || this.tamaData.texture.length === 0) {
-            Utils.dlog(`Enemy ${this.name} [ID:${this.id}] cannot shoot: Invalid or missing tamaData/textures.`);
+        // Ensure bulletData exists and is valid before emitting
+        if (!this.bulletData || !this.bulletData.texture || this.bulletData.texture.length === 0) {
+            Utils.dlog(`Enemy ${this.name} [ID:${this.id}] cannot shoot: Invalid or missing bulletData/textures.`);
             return;
         }
         // Emit event for the scene/manager to handle bullet creation

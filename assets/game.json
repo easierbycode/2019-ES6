@@ -264,7 +264,7 @@
 			"texture"		: ["soliderA0.gif", "soliderA1.gif", "soliderA2.gif"],
 			"shadowReverse": true,
 			"shadowOffsetY": 10,
-			"tamaData"		: {
+			"bulletData"		: {
 				"score"			: 100,
 				"cagage"			: 2,
 				"hp"				: 1,
@@ -283,7 +283,7 @@
 			"texture"		: ["soliderB0.gif", "soliderB1.gif", "soliderB2.gif"],
 			"shadowReverse": true,
 			"shadowOffsetY": 10,
-			"tamaData"		: {
+			"bulletData"		: {
 				"score"			: 100,
 				"cagage"			: 2,
 				"hp"				: 2,
@@ -302,7 +302,7 @@
 			"texture"		: ["soliderC0.gif", "soliderC1.gif", "soliderC2.gif"],
 			"shadowReverse": false,
 			"shadowOffsetY": 30,
-			"tamaData"		: {
+			"bulletData"		: {
 				"score"			: 100,
 				"cagage"			: 1,
 				"hp"				: 1,
@@ -321,7 +321,7 @@
 			"texture"		: ["tora0.gif", "tora1.gif", "tora2.gif", "tora3.gif", "tora4.gif", "tora5.gif", "tora6.gif", "tora7.gif", "tora8.gif", "tora9.gif"],
 			"shadowReverse": false,
 			"shadowOffsetY": 35,
-			"tamaData"		: null
+			"bulletData"		: null
 		},
 
 
@@ -337,7 +337,7 @@
 			"texture"		: ["woodenbox.gif"],
 			"shadowReverse": true,
 			"shadowOffsetY": 10,
-			"tamaData"		: null
+			"bulletData"		: null
 		},
 		"enemyP": {
 			"name"			: "drum",
@@ -349,7 +349,7 @@
 			"texture"		: ["drum.gif"],
 			"shadowReverse": true,
 			"shadowOffsetY": 10,
-			"tamaData"		: null
+			"bulletData"		: null
 		},
 		"enemyQ": {
 			"name"			: "launchpad",
@@ -361,7 +361,7 @@
 			"texture"		: ["launchpad.gif"],
 			"shadowReverse": true,
 			"shadowOffsetY": 10,
-			"tamaData"		: {
+			"bulletData"		: {
 				"score"			: 400,
 				"cagage"			: 1,
 				"hp"				: 1,
@@ -380,7 +380,7 @@
 			"texture"		: ["slotA.gif"],
 			"shadowReverse": true,
 			"shadowOffsetY": 10,
-			"tamaData"		: null
+			"bulletData"		: null
 		},
 		"enemyS": {
 			"name"	: "slotB",
@@ -392,7 +392,7 @@
 			"texture"		: ["slotB.gif"],
 			"shadowReverse": true,
 			"shadowOffsetY": 10,
-			"tamaData"		: null
+			"bulletData"		: null
 		},
 		"enemyT": {
 			"name"			: "baraA",
@@ -404,7 +404,7 @@
 			"texture"		: ["baraA.gif"],
 			"shadowReverse": true,
 			"shadowOffsetY": 10,
-			"tamaData"		: null
+			"bulletData"		: null
 		},
 		"enemyU": {
 			"name"			: "baraB",
@@ -416,7 +416,7 @@
 			"texture"		: ["baraB.gif"],
 			"shadowReverse": true,
 			"shadowOffsetY": 10,
-			"tamaData"		: null
+			"bulletData"		: null
 		},
 		"enemyV": {
 			"name"			: "vegasamazou",
@@ -428,7 +428,7 @@
 			"texture"		: ["vegasamazou.gif"],
 			"shadowReverse": true,
 			"shadowOffsetY": 10,
-			"tamaData"		: null
+			"bulletData"		: null
 		}
 		
 	},
@@ -449,7 +449,7 @@
 				"idle": ["bison_idle0.gif","bison_idle1.gif","bison_idle2.gif","bison_idle3.gif"],
 				"attack": ["bison_attack0.gif","bison_attack1.gif"]
 			},
-			"tamaData"		: {}
+			"bulletData"		: {}
 		},
 		"boss1": {
 			"name"			: "barlog",
@@ -465,7 +465,7 @@
 				"charge": ["barlog_charge0.gif","barlog_charge1.gif"],
 				"attack": ["barlog_attack0.gif","barlog_attack1.gif"]
 			},
-			"tamaData"		: {
+			"bulletData"		: {
 				"score"			: 150,
 				"cagage"			: 5,
 				"hp"				: 8,

@@ -15,7 +15,7 @@ export class BossFang extends Boss {
         };
         const explosionFrames = data.explosion;
 
-         // Process TamaData textures
+        // Process bulletData textures
          if (data.tamaDataA?.texture && !(data.tamaDataA.texture[0] instanceof PIXI.Texture)) {
              data.tamaDataA.texture = data.tamaDataA.texture.map(f => PIXI.Texture.from(f));
              data.tamaDataA.name = "beam"; // Assign names for logic
@@ -37,7 +37,7 @@ export class BossFang extends Boss {
         this.tamaDataA = data.tamaDataA; // Beam
         this.tamaDataB = data.tamaDataB; // Smoke Cloud
         this.tamaDataC = data.tamaDataC; // Meka Drones
-        this.tamaData = this.tamaDataA; // Default
+        this.bulletData = this.tamaDataA; // Default
 
         // Fang has no shadow
         if (this.shadow) {
@@ -91,8 +91,8 @@ export class BossFang extends Boss {
         const patternRoll = Math.random();
 
         if (patternRoll < 0.3) { // Beam Attack
-            this.tamaData = this.tamaDataA;
-            this.tamaData.cnt = 0; // Reset beam counter for sequence
+            this.bulletData = this.tamaDataA;
+            this.bulletData.cnt = 0; // Reset beam counter for sequence
             this.tlShoot
                 .addCallback(this.playChargeAnim, "+=0")
                 .addCallback(this.playBeamShootAnimAndSound, "+=0.5") // Shoot beam 1 (105 deg)
@@ -102,7 +102,7 @@ export class BossFang extends Boss {
                 .addCallback(() => {}, "+=1.0"); // Pause
 
         } else if (patternRoll < 0.7) { // Meka Drone Swarm
-            this.tamaData = this.tamaDataC;
+            this.bulletData = this.tamaDataC;
             this.tlShoot
                 .addCallback(this.playMekaDeploySound, "+=0.0")
                 .addCallback(this.shoot, "+=0.1") // Emit all drones at once
@@ -110,7 +110,7 @@ export class BossFang extends Boss {
                 .addCallback(() => {}, "+=4.0"); // Long wait while drones attack
 
         } else { // Smoke Cloud Attack
-            this.tamaData = this.tamaDataB;
+            this.bulletData = this.tamaDataB;
             this.tlShoot
                 .addCallback(this.playSmokeSound, "+=0")
                 .addCallback(this.playWaitAnim, "+=1.0") // Wait pose
@@ -135,7 +135,7 @@ export class BossFang extends Boss {
     }
     playBeamShootAnimAndSound() {
         this.playAnimation('shoot', false); // Beam anim likely not looped
-        this.shoot(); // Emits TAMA_ADD, GameScene handles logic based on tamaData.name and cnt
+        this.shoot(); // Emits TAMA_ADD, GameScene handles logic based on bulletData.name and cnt
         Sound.play("boss_fang_voice_beam0"); // Sound for each beam segment
     }
     playMekaDeploySound() {

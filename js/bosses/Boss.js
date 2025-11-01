@@ -28,7 +28,7 @@ export class Boss extends BaseUnit {
         this.hp = data.hp;
         this.cagage = data.cagage;
         this.animList = {}; // Store all animations (processed textures)
-        this.tamaData = data.tamaData; // Data for bullets
+        this.bulletData = data.bulletData; // Data for bullets
 
         // Pre-process all animation frames passed in animFrames object
         for (const key in animFrames) {
@@ -36,13 +36,13 @@ export class Boss extends BaseUnit {
                 this.animList[key] = animFrames[key].map(f => f instanceof PIXI.Texture ? f : PIXI.Texture.from(f));
             }
         }
-        // Pre-process tamaData textures if necessary (should ideally be done in loader)
-        if (this.tamaData?.texture && !(this.tamaData.texture[0] instanceof PIXI.Texture)) {
-             this.tamaData.texture = this.tamaData.texture.map(frame => PIXI.Texture.from(frame));
+        // Pre-process bulletData textures if necessary (should ideally be done in loader)
+        if (this.bulletData?.texture && !(this.bulletData.texture[0] instanceof PIXI.Texture)) {
+             this.bulletData.texture = this.bulletData.texture.map(frame => PIXI.Texture.from(frame));
         }
-        // Add explosion data to tamaData if needed by Bullet class
-        if(this.tamaData && explosionFramesProcessed) {
-            this.tamaData.explosion = explosionFramesProcessed;
+        // Add explosion data to bulletData if needed by Bullet class
+        if(this.bulletData && explosionFramesProcessed) {
+            this.bulletData.explosion = explosionFramesProcessed;
         }
 
 
@@ -315,7 +315,7 @@ export class Boss extends BaseUnit {
              this.dengerousBalloon = null;
          }
          this.animList = {};
-         this.tamaData = null;
+         this.bulletData = null;
 
          super.destroy(options); // Call BaseUnit destroy
      }
