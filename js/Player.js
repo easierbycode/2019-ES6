@@ -273,8 +273,8 @@ export class Player extends BaseUnit {
                 {
                     const bullet = new Bullet(this.shootNormalData);
                     bullet.unit.rotation = 270 * Math.PI / 180;
-                    bullet.unit.x = this.unit.x + 5 * Math.cos(bullet.unit.rotation) - 2;
-                    bullet.unit.y = this.unit.y + 5 * Math.sin(bullet.unit.rotation) - 15;
+                    bullet.unit.x = this.unit.x + 5 * Math.sin(bullet.unit.rotation) + 14;
+                    bullet.unit.y = this.unit.y + 5 * Math.sin(bullet.unit.rotation) + 11;
                     bullet.name = SHOOT_MODES.NORMAL;
                     bullet.id = this.bulletIdCnt++;
                     bullet.shadowReverse = false;
@@ -292,8 +292,8 @@ export class Player extends BaseUnit {
                 {
                     const bullet = new Bullet(this.shootBigData);
                     bullet.unit.rotation = 270 * Math.PI / 180;
-                    bullet.unit.x = this.unit.x + 5 * Math.cos(bullet.unit.rotation) + 0;
-                    bullet.unit.y = this.unit.y + 5 * Math.sin(bullet.unit.rotation) - 15;
+                    bullet.unit.x = this.unit.x + 5 * Math.sin(bullet.unit.rotation) + 10;
+                    bullet.unit.y = this.unit.y + 5 * Math.sin(bullet.unit.rotation) + 22;
                     bullet.name = SHOOT_MODES.BIG;
                     bullet.id = this.bulletIdCnt++;
                     bullet.shadowReverse = false;
@@ -313,16 +313,16 @@ export class Player extends BaseUnit {
                         const bullet = new Bullet(this.shoot3wayData);
                         if (i === 0) {
                             bullet.unit.rotation = 280 * Math.PI / 180;
-                            bullet.unit.x = this.unit.x + 5 * Math.cos(bullet.unit.rotation) + 4;
-                            bullet.unit.y = this.unit.y + 5 * Math.sin(bullet.unit.rotation) - 15;
+                            bullet.unit.x = this.unit.x + 5 * Math.cos(bullet.unit.rotation) + 14;
+                            bullet.unit.y = this.unit.y + 5 * Math.sin(bullet.unit.rotation) + 11;
                         } else if (i === 1) {
                             bullet.unit.rotation = 270 * Math.PI / 180;
-                            bullet.unit.x = this.unit.x + 5 * Math.cos(bullet.unit.rotation) + 0;
-                            bullet.unit.y = this.unit.y + 5 * Math.sin(bullet.unit.rotation) - 15;
+                            bullet.unit.x = this.unit.x + 5 * Math.cos(bullet.unit.rotation) + 10;
+                            bullet.unit.y = this.unit.y + 5 * Math.sin(bullet.unit.rotation) + 11;
                         } else if (i === 2) {
                             bullet.unit.rotation = 260 * Math.PI / 180;
-                            bullet.unit.x = this.unit.x + 5 * Math.cos(bullet.unit.rotation) - 4;
-                            bullet.unit.y = this.unit.y + 5 * Math.sin(bullet.unit.rotation) - 15;
+                            bullet.unit.x = this.unit.x + 5 * Math.cos(bullet.unit.rotation) + 6;
+                            bullet.unit.y = this.unit.y + 5 * Math.sin(bullet.unit.rotation) + 11;
                         }
                         bullet.id = this.bulletIdCnt++;
                         bullet.shadowReverse = false;
