@@ -16,28 +16,28 @@ export class BossFang extends Boss {
         const explosionFrames = data.explosion;
 
         // Process bulletData textures
-         if (data.tamaDataA?.texture && !(data.tamaDataA.texture[0] instanceof PIXI.Texture)) {
-             data.tamaDataA.texture = data.tamaDataA.texture.map(f => PIXI.Texture.from(f));
-             data.tamaDataA.name = "beam"; // Assign names for logic
-             data.tamaDataA.cnt = 0;
-         }
-         if (data.tamaDataB?.texture && !(data.tamaDataB.texture[0] instanceof PIXI.Texture)) {
-             data.tamaDataB.texture = data.tamaDataB.texture.map(f => PIXI.Texture.from(f));
-             data.tamaDataB.name = "smoke";
-         }
-         if (data.tamaDataC?.texture && !(data.tamaDataC.texture[0] instanceof PIXI.Texture)) {
-             data.tamaDataC.texture = data.tamaDataC.texture.map(f => PIXI.Texture.from(f));
-             data.tamaDataC.name = "meka";
-         }
+        if (data.bulletDataA?.texture && !(data.bulletDataA.texture[0] instanceof PIXI.Texture)) {
+            data.bulletDataA.texture = data.bulletDataA.texture.map(f => PIXI.Texture.from(f));
+            data.bulletDataA.name = "beam"; // Assign names for logic
+            data.bulletDataA.cnt = 0;
+        }
+        if (data.bulletDataB?.texture && !(data.bulletDataB.texture[0] instanceof PIXI.Texture)) {
+            data.bulletDataB.texture = data.bulletDataB.texture.map(f => PIXI.Texture.from(f));
+            data.bulletDataB.name = "smoke";
+        }
+        if (data.bulletDataC?.texture && !(data.bulletDataC.texture[0] instanceof PIXI.Texture)) {
+            data.bulletDataC.texture = data.bulletDataC.texture.map(f => PIXI.Texture.from(f));
+            data.bulletDataC.name = "meka";
+        }
 
 
         super(data, animFrames, explosionFrames);
 
         // --- Fang Specific Setup ---
-        this.tamaDataA = data.tamaDataA; // Beam
-        this.tamaDataB = data.tamaDataB; // Smoke Cloud
-        this.tamaDataC = data.tamaDataC; // Meka Drones
-        this.bulletData = this.tamaDataA; // Default
+        this.bulletDataA = data.bulletDataA; // Beam
+        this.bulletDataB = data.bulletDataB; // Smoke Cloud
+        this.bulletDataC = data.bulletDataC; // Meka Drones
+        this.bulletData = this.bulletDataA; // Default
 
         // Fang has no shadow
         if (this.shadow) {
@@ -91,7 +91,7 @@ export class BossFang extends Boss {
         const patternRoll = Math.random();
 
         if (patternRoll < 0.3) { // Beam Attack
-            this.bulletData = this.tamaDataA;
+            this.bulletData = this.bulletDataA;
             this.bulletData.cnt = 0; // Reset beam counter for sequence
             this.tlShoot
                 .addCallback(this.playChargeAnim, "+=0")
@@ -102,7 +102,7 @@ export class BossFang extends Boss {
                 .addCallback(() => {}, "+=1.0"); // Pause
 
         } else if (patternRoll < 0.7) { // Meka Drone Swarm
-            this.bulletData = this.tamaDataC;
+            this.bulletData = this.bulletDataC;
             this.tlShoot
                 .addCallback(this.playMekaDeploySound, "+=0.0")
                 .addCallback(this.shoot, "+=0.1") // Emit all drones at once
@@ -110,7 +110,7 @@ export class BossFang extends Boss {
                 .addCallback(() => {}, "+=4.0"); // Long wait while drones attack
 
         } else { // Smoke Cloud Attack
-            this.bulletData = this.tamaDataB;
+            this.bulletData = this.bulletDataB;
             this.tlShoot
                 .addCallback(this.playSmokeSound, "+=0")
                 .addCallback(this.playWaitAnim, "+=1.0") // Wait pose

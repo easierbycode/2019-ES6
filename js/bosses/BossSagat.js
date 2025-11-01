@@ -16,20 +16,20 @@ export class BossSagat extends Boss {
         const explosionFrames = data.explosion;
 
         // Ensure bulletData textures are processed
-        if (data.tamaDataA?.texture && !(data.tamaDataA.texture[0] instanceof PIXI.Texture)) {
-            data.tamaDataA.texture = data.tamaDataA.texture.map(f => PIXI.Texture.from(f));
+        if (data.bulletDataA?.texture && !(data.bulletDataA.texture[0] instanceof PIXI.Texture)) {
+            data.bulletDataA.texture = data.bulletDataA.texture.map(f => PIXI.Texture.from(f));
         }
-        if (data.tamaDataB?.texture && !(data.tamaDataB.texture[0] instanceof PIXI.Texture)) {
-            data.tamaDataB.texture = data.tamaDataB.texture.map(f => PIXI.Texture.from(f));
+        if (data.bulletDataB?.texture && !(data.bulletDataB.texture[0] instanceof PIXI.Texture)) {
+            data.bulletDataB.texture = data.bulletDataB.texture.map(f => PIXI.Texture.from(f));
         }
 
 
         super(data, animFrames, explosionFrames);
 
         // --- Sagat Specific Setup ---
-        this.tamaDataA = data.tamaDataA; // High Tiger Shot
-        this.tamaDataB = data.tamaDataB; // Low Tiger Shot (Ground Tiger Shot)
-        this.bulletData = this.tamaDataA; // Default to high shot
+        this.bulletDataA = data.bulletDataA; // High Tiger Shot
+        this.bulletDataB = data.bulletDataB; // Low Tiger Shot (Ground Tiger Shot)
+        this.bulletData = this.bulletDataA; // Default to high shot
 
         this.unit.hitArea = new PIXI.Rectangle(
             -this.character.width / 2 + 20, -this.character.height / 2 + 20,
@@ -66,7 +66,7 @@ export class BossSagat extends Boss {
         const patternRoll = Math.random();
 
         if (patternRoll < 0.3) { // High Tiger Shots (Sweep)
-            this.bulletData = this.tamaDataA;
+            this.bulletData = this.bulletDataA;
             this.tlShoot
                 .to(this, 0.25, { x: minX + 20 }) // Move near left
                 .addCallback(this.playChargeAnim, "+=0", null, this)
@@ -81,7 +81,7 @@ export class BossSagat extends Boss {
                 .addCallback(this.playIdleAnim, "+=0.3", null, this);
 
         } else if (patternRoll < 0.6) { // High Tiger Shots (Rapid Fire at Player)
-            this.bulletData = this.tamaDataA;
+            this.bulletData = this.bulletDataA;
             this.tlShoot
                 .to(this, 0.25, { x: targetX }) // Move above player
                 .addCallback(this.playChargeAnim, "+=0", null, this)
@@ -94,7 +94,7 @@ export class BossSagat extends Boss {
                 .addCallback(this.playIdleAnim, "+=0.3", null, this);
 
         } else if (patternRoll < 0.8) { // Ground Tiger Shot (Low)
-            this.bulletData = this.tamaDataB;
+            this.bulletData = this.bulletDataB;
             this.tlShoot
                 .to(this, 0.25, { x: targetX }) // Move above player
                 .addCallback(this.playChargeAnim, "+=0", null, this)

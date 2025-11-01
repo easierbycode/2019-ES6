@@ -18,21 +18,21 @@ export class BossVega extends Boss {
         const explosionFrames = data.explosion;
 
         // Ensure bulletData textures are processed
-         if (data.tamaDataA?.texture && !(data.tamaDataA.texture[0] instanceof PIXI.Texture)) {
-             data.tamaDataA.texture = data.tamaDataA.texture.map(f => PIXI.Texture.from(f));
-         }
-         if (data.tamaDataB?.texture && !(data.tamaDataB.texture[0] instanceof PIXI.Texture)) {
-             data.tamaDataB.texture = data.tamaDataB.texture.map(f => PIXI.Texture.from(f));
-             data.tamaDataB.name = "psychoField"; // Assign name if needed by bullet logic
-         }
+        if (data.bulletDataA?.texture && !(data.bulletDataA.texture[0] instanceof PIXI.Texture)) {
+            data.bulletDataA.texture = data.bulletDataA.texture.map(f => PIXI.Texture.from(f));
+        }
+        if (data.bulletDataB?.texture && !(data.bulletDataB.texture[0] instanceof PIXI.Texture)) {
+            data.bulletDataB.texture = data.bulletDataB.texture.map(f => PIXI.Texture.from(f));
+            data.bulletDataB.name = "psychoField"; // Assign name if needed by bullet logic
+        }
 
 
         super(data, animFrames, explosionFrames);
 
         // --- Vega Specific Setup ---
-        this.tamaDataA = data.tamaDataA; // Psycho Ball?
-        this.tamaDataB = data.tamaDataB; // Psycho Field
-        this.bulletData = this.tamaDataA; // Default
+        this.bulletDataA = data.bulletDataA; // Psycho Ball?
+        this.bulletDataB = data.bulletDataB; // Psycho Field
+        this.bulletData = this.bulletDataA; // Default
 
         this.unit.hitArea = new PIXI.Rectangle(
              -this.character.width / 2 + 20, -this.character.height / 2 + 13,
@@ -113,7 +113,7 @@ export class BossVega extends Boss {
                  .addCallback(() => {}, "+=0.5"); // Pause
 
         } else if (patternRoll < 0.4) { // Psycho Ball Rain (Teleport + Shoot)
-            this.bulletData = this.tamaDataA;
+            this.bulletData = this.bulletDataA;
             this.tlShoot
                 .addCallback(this.teleportOut, "+=0")
                 .addCallback(() => { this.x = minX + 10; this.playPsychoShootSound(); this.playShootAnim(); this.shoot(); }, "+=0.1")
@@ -129,7 +129,7 @@ export class BossVega extends Boss {
                 .addCallback(() => {}, "+=3.0"); // Longer pause
 
         } else if (patternRoll < 0.7) { // Psycho Field Attack
-            this.bulletData = this.tamaDataB; // Set bullet type to Field
+            this.bulletData = this.bulletDataB; // Set bullet type to Field
             this.tlShoot
                 .to(this, 0.3, { x: Constants.GAME_DIMENSIONS.CENTER_X, y: targetY + 10 })
                 .addCallback(this.playPsychoFieldAnimAndSound, "+=0.5")

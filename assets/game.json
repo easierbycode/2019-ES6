@@ -488,7 +488,7 @@
 				"shoot": ["sagat_shoot0.gif"],
 				"attack": ["sagat_attack0.gif"]
 			},
-			"tamaDataA"		: {
+			"bulletDataA"		: {
 				"score"			: 200,
 				"cagage"			: 2,
 				"hp"				: 5,
@@ -496,7 +496,7 @@
 				"damage"			: 1,
 				"texture"		: ["sagat_tamaA0.gif", "sagat_tamaA1.gif"]
 			},
-			"tamaDataB"		: {
+			"bulletDataB"		: {
 				"score"			: 500,
 				"cagage"			: 20,
 				"hp"				: 18,
@@ -518,7 +518,7 @@
 				"shoot": ["vega_shoot0.gif","vega_shoot1.gif"],
 				"attack": ["vega_attack0.gif","vega_attack1.gif","vega_attack2.gif","vega_attack3.gif"]
 			},
-			"tamaDataA"		: {
+			"bulletDataA"		: {
 				"score"			: 100,
 				"cagage"			: 10,
 				"hp"				: 10,
@@ -526,7 +526,7 @@
 				"damage"			: 1,
 				"texture"		: ["vega_tama0.gif", "vega_tama1.gif", "vega_tama2.gif", "vega_tama3.gif"]
 			},
-			"tamaDataB"		: {
+			"bulletDataB"		: {
 				"score"			: 100,
 				"cagage"			: 1,
 				"hp"				: 2,
@@ -551,7 +551,7 @@
 				"shootA": ["goki_shootA0.gif", "goki_shootA1.gif", "goki_shootA2.gif"],
 				"shootB": ["goki_shootB0.gif", "goki_shootB1.gif", "goki_shootB2.gif", "goki_shootB3.gif", "goki_shootB4.gif"]
 			},
-			"tamaDataA"		: {
+			"bulletDataA"		: {
 				"score"			: 100,
 				"cagage"			: 5,
 				"hp"				: 5,
@@ -559,7 +559,7 @@
 				"damage"			: 1,
 				"texture"		: ["goki_tamaA0.gif", "goki_tamaA1.gif", "goki_tamaA2.gif"]
 			},
-			"tamaDataB"		: {
+			"bulletDataB"		: {
 				"score"			: 500,
 				"cagage"			: 10,
 				"hp"				: 20,
@@ -582,7 +582,7 @@
 				"charge": ["fang_charge0.gif", "fang_charge1.gif", "fang_charge2.gif", "fang_charge3.gif"],
 				"shoot": ["fang_shoot0.gif", "fang_shoot1.gif"]
 			},
-			"tamaDataA"		: {
+			"bulletDataA"		: {
 				"score"			: 222,
 				"cagage"			: 5,
 				"hp"				: 9,
@@ -590,7 +590,7 @@
 				"damage"			: 1,
 				"texture"		: ["fang_tamaA0.gif","fang_tamaA1.gif"]
 			},
-			"tamaDataB"		: {
+			"bulletDataB"		: {
 				"score"			: 222,
 				"cagage"			: 10,
 				"hp"				: 15,
@@ -598,7 +598,7 @@
 				"damage"			: 1,
 				"texture"		: ["fang_tamaB0.gif", "fang_tamaB1.gif", "fang_tamaB2.gif","fang_tamaB3.gif", "fang_tamaB4.gif", "fang_tamaB5.gif","fang_tamaB6.gif","fang_tamaB7.gif","fang_tamaB8.gif"]
 			},
-			"tamaDataC"		: {
+			"bulletDataC"		: {
 				"score"			: 222,
 				"cagage"			: 5,
 				"hp"				: 4,

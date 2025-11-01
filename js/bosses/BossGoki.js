@@ -18,22 +18,22 @@ export class BossGoki extends Boss {
         const explosionFrames = data.explosion;
 
         // Process bulletData textures
-         if (data.tamaDataA?.texture && !(data.tamaDataA.texture[0] instanceof PIXI.Texture)) {
-             data.tamaDataA.texture = data.tamaDataA.texture.map(f => PIXI.Texture.from(f));
-             if(explosionFrames) data.tamaDataA.explosion = explosionFrames; // Add explosion for bullet hits
-         }
-         if (data.tamaDataB?.texture && !(data.tamaDataB.texture[0] instanceof PIXI.Texture)) {
-             data.tamaDataB.texture = data.tamaDataB.texture.map(f => PIXI.Texture.from(f));
-             if(explosionFrames) data.tamaDataB.explosion = explosionFrames;
-         }
+        if (data.bulletDataA?.texture && !(data.bulletDataA.texture[0] instanceof PIXI.Texture)) {
+            data.bulletDataA.texture = data.bulletDataA.texture.map(f => PIXI.Texture.from(f));
+            if (explosionFrames) data.bulletDataA.explosion = explosionFrames; // Add explosion for bullet hits
+        }
+        if (data.bulletDataB?.texture && !(data.bulletDataB.texture[0] instanceof PIXI.Texture)) {
+            data.bulletDataB.texture = data.bulletDataB.texture.map(f => PIXI.Texture.from(f));
+            if (explosionFrames) data.bulletDataB.explosion = explosionFrames;
+        }
 
 
         super(data, animFrames, explosionFrames);
 
         // --- Goki Specific Setup ---
-        this.tamaDataA = data.tamaDataA; // Gohadoken data
-        this.tamaDataB = data.tamaDataB; // Zanku Hadoken data
-        this.bulletData = this.tamaDataA; // Default
+        this.bulletDataA = data.bulletDataA; // Gohadoken data
+        this.bulletDataB = data.bulletDataB; // Zanku Hadoken data
+        this.bulletData = this.bulletDataA; // Default
 
         this.unit.hitArea = new PIXI.Rectangle(
              -this.character.width / 2 + 15, -this.character.height / 2 + 20,
@@ -92,7 +92,7 @@ export class BossGoki extends Boss {
         const patternRoll = Math.random();
 
         if (patternRoll < 0.35) { // Rapid Gohadoken (High)
-            this.bulletData = this.tamaDataA;
+            this.bulletData = this.bulletDataA;
             this.tlShoot
                 .to(this, 0.4, { x: targetX })
                 .addCallback(this.playShootAAnim, "+=0")
@@ -105,7 +105,7 @@ export class BossGoki extends Boss {
                 .addCallback(this.playIdleAnim, "+=0.3");
 
         } else if (patternRoll < 0.65) { // Zanku Hadoken (Air)
-            this.bulletData = this.tamaDataB;
+            this.bulletData = this.bulletDataB;
             this.tlShoot
                 .to(this, 0.4, { x: targetX })
                 .addCallback(this.playShootBAnimAndSound, "+=0")
