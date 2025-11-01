@@ -1,5 +1,6 @@
 // GameScene.js (Original 'Ki')
 import { BaseScene } from './BaseScene.js';
+import { BaseUnit } from './BaseUnit.js';
 import * as Constants from './constants.js';
 import { gameState, saveHighScore } from './gameState.js';
 import { globals } from './globals.js';
@@ -333,7 +334,9 @@ export class GameScene extends BaseScene {
         for (let i = this.items.length - 1; i >= 0; i--) {
             const item = this.items[i];
             item.y += (1 + scroll) * delta; // Item falling speed + stage scroll
-            item.loop(delta); // For animation
+            if (typeof item.loop === 'function') {
+                item.loop(delta); // For animation
+            }
 
             // Check off-screen
             if (item.y > Constants.GAME_DIMENSIONS.HEIGHT) {
@@ -953,44 +956,36 @@ export class GameScene extends BaseScene {
         }
     }
 
-    _handleEnemyRemoved(enemy, index = -1) { // Called on Enemy.CUSTOM_EVENT_DEAD
-        if (!enemy) return;
-
-        // Add score, combo, CA gauge
-        this.hud.comboCount += 1; // Use increment setter
-        this.hud.scoreCount += enemy.score; // Use increment setter (handles ratio)
-        this.hud.cagageCount += enemy.cagage; // Use increment setter
-        this.hud.scoreView(enemy); // Show score popup
-
-        // Drop item
-        const item = enemy.dropItem();
-        if (item) {
-            this.unitContainer.addChild(item);
-            this.items.push(item);
-        }
-
-        // The enemy object itself is not removed from the array or stage yet.
-        // This happens in handleEnemyCleanup after the death animation.
-    }
-
     // Called when enemy CUSTOM_EVENT_DEAD is fired
     handleEnemyRemoved(enemy, index = -1) {
-        if (!enemy || enemy.deadFlg || !this.hud) return;
+        if (!enemy || !this.hud) return;
         Utils.dlog(`Enemy removed callback for ${enemy.name} [ID:${enemy.id}]`);
 
-        // Show score popup FIRST, using the current combo multiplier
+        // Mirror original enemyRemove logic order
+        this.hud.comboCount = 1;
+        this.hud.scoreCount = enemy.score;
+        this.hud.cagageCount = this.hud.cagageCount + enemy.cagage;
         this.hud.scoreView(enemy);
 
-        // THEN update the HUD state
-        this.hud.comboCount = 1; // Use setter (increments by 1)
-        this.hud.cagageCount = this.hud.cagageCount + enemy.cagage; // Use setter
-        this.hud.scoreCount = enemy.score; // Use setter (applies multiplier)
+        if (enemy.itemName) {
+            const itemTextures = enemy.itemTextureFrames && enemy.itemTextureFrames.length > 0
+                ? enemy.itemTextureFrames
+                : null;
 
-        const item = enemy.dropItem();
-        if (item) {
-            this.unitContainer.addChild(item); // Add item to unit container
-            this.items.push(item);
-            Utils.dlog(`Dropped item ${item.itemName} from ${enemy.name}`);
+            if (itemTextures) {
+                const item = new AnimatedItem(itemTextures, enemy.itemName);
+                const unitX = enemy.unit ? enemy.unit.x : 0;
+                const unitY = enemy.unit ? enemy.unit.y : 0;
+                item.x = enemy.x + unitX;
+                item.y = enemy.y + unitY;
+                item.name = enemy.itemName;
+
+                this.unitContainer.addChild(item);
+                this.items.push(item);
+                Utils.dlog(`Dropped item ${item.itemName} from ${enemy.name}`);
+            } else {
+                Utils.dlog(`Item drop for ${enemy.name} skipped: textures missing or invalid.`);
+            }
         }
     }
 

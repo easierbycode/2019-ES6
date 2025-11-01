@@ -49,8 +49,8 @@ export class AnimatedItem extends PIXI.extras.AnimatedSprite {
     }
 
     // Add loop method if items need specific update logic (e.g., bobbing)
-    // loop(delta) {
-    //     // Example: Bobbing effect
-    //     // this.y += Math.sin(Date.now() * 0.005) * 0.2 * delta * 60;
-    // }
+    loop(delta) {
+        // No-op placeholder; GameScene expects items to expose loop().
+        // Extend this method if items require per-frame behavior.
+    }
 }
