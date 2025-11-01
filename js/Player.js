@@ -239,6 +239,7 @@ export class Player extends BaseUnit {
         // Update and cleanup bullets (from app_formatted.js lines 888-894)
         for (let i = this.bulletList.length - 1; i >= 0; i--) {
             const bullet = this.bulletList[i];
+            bullet.loop(delta); // Update bullet animation/state
             bullet.unit.x += 3.5 * Math.cos(bullet.unit.rotation);
             bullet.unit.y += 3.5 * Math.sin(bullet.unit.rotation);
 
