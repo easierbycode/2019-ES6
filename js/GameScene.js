@@ -1188,6 +1188,8 @@ export class GameScene extends BaseScene {
                 }
                 this.theWorldFlg = false;
                 this.hud.caFireFlg = false;
+                // Restart player shooting after CA animation completes
+                if (this.player) this.player.shootStart();
                 if (this.boss) {
                     if (this.boss.hp <= 0) {
                         this.theWorldFlg = true;
