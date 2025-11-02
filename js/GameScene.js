@@ -1286,7 +1286,7 @@ export class GameScene extends BaseScene {
 
     stageClear() {
         Utils.dlog("GameScene.stageClear()");
-        if (this.theWorldFlg && this.sceneSwitch !== 0) return; // Already transitioning
+        if (this.sceneSwitch !== 0) return; // Already transitioning
 
         this.theWorldFlg = true; // Prevent further updates
         this.sceneSwitch = 1; // Mark for transitioning to next stage/adv
