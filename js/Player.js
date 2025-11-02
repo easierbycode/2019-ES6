@@ -11,6 +11,7 @@ import * as Utils from './utils.js'; // Ensure Utils is imported
 
 export class Player extends BaseUnit {
     static CUSTOM_EVENT_BULLET_ADD = "playerBulletAdd";
+    static CUSTOM_EVENT_CA_FIRE = "playerCaFire";
 
     constructor(data) {
         console.log("Player constructor called");
@@ -88,6 +89,7 @@ export class Player extends BaseUnit {
         this.shootIntervalBase = 0; // Renamed from shootInterval
         this.shootData = {}; // Current bullet data
         this.shootMode = SHOOT_MODES.NORMAL;
+        this.gameScene = null; // Reference set by scene so player can trigger scene actions
 
         this.unitX = Constants.GAME_DIMENSIONS.CENTER_X; // Target X position
         this.unitY = Constants.GAME_DIMENSIONS.HEIGHT - (this.character?.height || 50) - 30; // Target Y
@@ -115,15 +117,15 @@ export class Player extends BaseUnit {
         this.keyUpListener = this.onKeyUp.bind(this);
         this._listenersAttached = false; // Flag to track listener state
 
-         // Adjust hitArea based on actual sprite size
-         this.unit.hitArea = new PIXI.Rectangle(
+        // Adjust hitArea based on actual sprite size
+        this.unit.hitArea = new PIXI.Rectangle(
             -this.character.width / 2 + 7, // Adjust x based on anchor
             -this.character.height / 2 + 20, // Adjust y based on anchor
             this.character.width - 14,
             this.character.height - 40
-         );
+        );
 
-         this.updateShootData(); // Initialize shoot data
+        this.updateShootData(); // Initialize shoot data
     }
 
     // --- Getters/Setters ---
@@ -151,49 +153,49 @@ export class Player extends BaseUnit {
         this._listenersAttached = false;
     }
 
-     // Pointer events should be handled by the scene's input layer
-     onScreenDragStart(event) {
-         this.screenDragFlg = true;
-         this.updateTargetX(event.data.global.x);
-     }
+    // Pointer events should be handled by the scene's input layer
+    onScreenDragStart(event) {
+        this.screenDragFlg = true;
+        this.updateTargetX(event.data.global.x);
+    }
 
-     onScreenDragMove(event) {
-         if (this.screenDragFlg) {
-             this.updateTargetX(event.data.global.x);
-         }
-     }
+    onScreenDragMove(event) {
+        if (this.screenDragFlg) {
+            this.updateTargetX(event.data.global.x);
+        }
+    }
 
-     onScreenDragEnd(event) {
-         this.screenDragFlg = false;
-     }
+    onScreenDragEnd(event) {
+        this.screenDragFlg = false;
+    }
 
-     onKeyDown(event) {
-         this.keyDownFlg = true;
-         this.keyDownCode = event.keyCode;
-         event.preventDefault();
-     }
+    onKeyDown(event) {
+        this.keyDownFlg = true;
+        this.keyDownCode = event.keyCode;
+        event.preventDefault();
+    }
 
-     onKeyUp(event) {
-         this.keyDownFlg = false;
-         event.preventDefault();
-     }
+    onKeyUp(event) {
+        this.keyDownFlg = false;
+        event.preventDefault();
+    }
 
     updateTargetX(globalX) {
         if (!this.parent) {
             return;
         }
-         const halfHitboxWidth = this.unit.hitArea.width / 2;
-         // Adjust target based on the object's center, not the global X directly
-         let target = globalX - this.parent.x; // Adjust for container position if player is nested
+        const halfHitboxWidth = this.unit.hitArea.width / 2;
+        // Adjust target based on the object's center, not the global X directly
+        let target = globalX - this.parent.x; // Adjust for container position if player is nested
 
-         target = Math.max(halfHitboxWidth, target);
-         target = Math.min(Constants.GAME_DIMENSIONS.WIDTH - halfHitboxWidth, target);
-         this.unitX = target;
+        target = Math.max(halfHitboxWidth, target);
+        target = Math.min(Constants.GAME_DIMENSIONS.WIDTH - halfHitboxWidth, target);
+        this.unitX = target;
     }
 
     // --- Game Loop ---
     loop(delta) {
-         if (this.deadFlg) return;
+        if (this.deadFlg) return;
         // --- Movement ---
         if (this.keyDownFlg) {
             const moveSpeed = 6 * delta; // Adjust speed based on delta
@@ -202,29 +204,29 @@ export class Player extends BaseUnit {
                     this.unitX -= moveSpeed;
                     break;
                 case 39: // Right Arrow
-                     this.unitX += moveSpeed;
-                     break;
+                    this.unitX += moveSpeed;
+                    break;
             }
-             // Clamp position based on center and hitArea width
-             const halfHitboxWidth = this.unit.hitArea.width / 2;
-             this.unitX = Math.max(halfHitboxWidth, this.unitX);
-             this.unitX = Math.min(Constants.GAME_DIMENSIONS.WIDTH - halfHitboxWidth, this.unitX);
+            // Clamp position based on center and hitArea width
+            const halfHitboxWidth = this.unit.hitArea.width / 2;
+            this.unitX = Math.max(halfHitboxWidth, this.unitX);
+            this.unitX = Math.min(Constants.GAME_DIMENSIONS.WIDTH - halfHitboxWidth, this.unitX);
         }
 
-         // Smooth movement towards target using lerp (linear interpolation)
-         // Delta is typically 1.0 at 60fps, so we just use 0.09 as the lerp factor
-         const lerpFactor = 0.09; // Keep constant for smooth movement
-         this.x += lerpFactor * (this.unitX - this.x);
-         // Player Y is usually fixed or handled differently, lerping might not be desired
-         // this.y += lerpFactor * (this.unitY - this.y);
+        // Smooth movement towards target using lerp (linear interpolation)
+        // Delta is typically 1.0 at 60fps, so we just use 0.09 as the lerp factor
+        const lerpFactor = 0.09; // Keep constant for smooth movement
+        this.x += lerpFactor * (this.unitX - this.x);
+        // Player Y is usually fixed or handled differently, lerping might not be desired
+        // this.y += lerpFactor * (this.unitY - this.y);
 
-         // Update barrier position relative to the player's current position
-         if (this.barrier) {
+        // Update barrier position relative to the player's current position
+        if (this.barrier) {
             this.barrier.x = 0; // Relative to player center because of anchor
             this.barrier.y = -this.character.height / 2 + this.barrier.height / 2 - 15; // Adjust based on anchors
         }
 
-         this.updateShadowPosition(); // Update shadow position based on character
+        this.updateShadowPosition(); // Update shadow position based on character
 
         // --- Shooting (Frame-based) ---
         this.bulletFrameCnt++; // Increment frame counter
@@ -237,17 +239,17 @@ export class Player extends BaseUnit {
         }
     }
 
-     // Override BaseUnit's updateShadowPosition if Player's shadow behaves differently
-     updateShadowPosition() {
-         this.shadow.x = 0; // Centered due to anchor
-         if (this.shadowReverse) {
-             this.shadow.scale.y = -1;
-             this.shadow.y = this.character.height / 2 + this.shadow.height / 2 - this.shadowOffsetY;
-         } else {
-             this.shadow.scale.y = 1;
-             this.shadow.y = this.character.height / 2 + this.shadow.height / 2 - this.shadowOffsetY;
-         }
-     }
+    // Override BaseUnit's updateShadowPosition if Player's shadow behaves differently
+    updateShadowPosition() {
+        this.shadow.x = 0; // Centered due to anchor
+        if (this.shadowReverse) {
+            this.shadow.scale.y = -1;
+            this.shadow.y = this.character.height / 2 + this.shadow.height / 2 - this.shadowOffsetY;
+        } else {
+            this.shadow.scale.y = 1;
+            this.shadow.y = this.character.height / 2 + this.shadow.height / 2 - this.shadowOffsetY;
+        }
+    }
 
 
     // --- Shooting Logic ---
@@ -320,22 +322,33 @@ export class Player extends BaseUnit {
         this.emit(Player.CUSTOM_EVENT_BULLET_ADD, bullets);
     }
 
-    // Bullet management now handled by GameScene
-    // bulletRemove and bulletRemoveComplete methods no longer needed
+    bulletRemove(bullet) {
+        for (var e = 0; e < this.bulletList.length; e++) {
+            if (bullet.id === this.bulletList[e].id) {
+                this.bulletList.splice(e, 1);
+            }
+        }
+    }
+
+    bulletRemoveComplete(bullet) {
+        bullet.off(BaseUnit.CUSTOM_EVENT_DEAD, this.bulletRemove.bind(this, bullet));
+        bullet.off(BaseUnit.CUSTOM_EVENT_DEAD_COMPLETE, this.bulletRemoveComplete.bind(this, bullet));
+        this.removeChild(bullet);
+    }
 
     updateShootData() {
-         switch (this.shootMode) {
-             case SHOOT_MODES.NORMAL:
-                 this.shootData = this.shootNormalData;
-                 break;
-             case SHOOT_MODES.BIG:
-                 this.shootData = this.shootBigData;
-                 break;
-             case SHOOT_MODES.THREE_WAY:
-                 this.shootData = this.shoot3wayData;
-                 break;
-         }
-         this.shootIntervalBase = this.shootData.interval || 20; // Default interval if missing
+        switch (this.shootMode) {
+            case SHOOT_MODES.NORMAL:
+                this.shootData = this.shootNormalData;
+                break;
+            case SHOOT_MODES.BIG:
+                this.shootData = this.shootBigData;
+                break;
+            case SHOOT_MODES.THREE_WAY:
+                this.shootData = this.shoot3wayData;
+                break;
+        }
+        this.shootIntervalBase = this.shootData.interval || 20; // Default interval if missing
     }
 
     shootModeChange(newMode) {
@@ -387,6 +400,25 @@ export class Player extends BaseUnit {
         this.bulletFrameCnt = 0; // Reset counter when starting
     }
 
+    setGameScene(scene) {
+        this.gameScene = scene;
+    }
+
+    caFire() {
+        if (this.gameScene && typeof this.gameScene.caFire === 'function') {
+            this.gameScene.caFire();
+            return true;
+        }
+        if (typeof this.listeners === 'function') {
+            const listeners = this.listeners(Player.CUSTOM_EVENT_CA_FIRE) || [];
+            if (listeners.length > 0) {
+                this.emit(Player.CUSTOM_EVENT_CA_FIRE);
+                return true;
+            }
+        }
+        return false;
+    }
+
     // --- Barrier Logic ---
     barrierStart() {
         if (!this.barrier || this.barrierFlg) return; // No barrier sprite or already active
@@ -397,13 +429,13 @@ export class Player extends BaseUnit {
         this.barrier.visible = true;
 
         if (this.barrierEffect) {
-             this.barrierEffect.x = this.barrier.x; // Position relative to barrier
-             this.barrierEffect.y = this.barrier.y;
-             this.barrierEffect.alpha = 1;
-             this.barrierEffect.visible = true;
-             this.barrierEffect.scale.set(0.5);
-             TweenMax.to(this.barrierEffect.scale, 0.4, { x: 1, y: 1, ease: Quint.easeOut });
-             TweenMax.to(this.barrierEffect, 0.5, { alpha: 0 });
+            this.barrierEffect.x = this.barrier.x; // Position relative to barrier
+            this.barrierEffect.y = this.barrier.y;
+            this.barrierEffect.alpha = 1;
+            this.barrierEffect.visible = true;
+            this.barrierEffect.scale.set(0.5);
+            TweenMax.to(this.barrierEffect.scale, 0.4, { x: 1, y: 1, ease: Quint.easeOut });
+            TweenMax.to(this.barrierEffect, 0.5, { alpha: 0 });
         }
 
         // Kill previous timeline if exists
@@ -413,8 +445,8 @@ export class Player extends BaseUnit {
 
         this.barrierTimeline = new TimelineMax({
             onComplete: () => {
-                if(this.barrier) this.barrier.visible = false;
-                if(this.barrierEffect) this.barrierEffect.visible = false;
+                if (this.barrier) this.barrier.visible = false;
+                if (this.barrierEffect) this.barrierEffect.visible = false;
                 this.barrierFlg = false;
                 Sound.play('se_barrier_end');
                 this.barrierTimeline = null; // Clear reference
@@ -422,13 +454,13 @@ export class Player extends BaseUnit {
         });
 
         // Recreate the blinking effect (simplified version)
-         this.barrierTimeline
-             .to(this.barrier, 0.3, { alpha: 1 }) // Fade in
-             .to(this.barrier, 0.1, { alpha: 0, delay: 4.0, repeat: 10, yoyo: true }) // Blink fast towards end
-             .to(this.barrier, 0.5, { alpha: 1, delay: 1.0}) // Stay solid longer
-             .to(this.barrier, 0.1, { alpha: 0, delay: 0.5, repeat: 6, yoyo: true }) // Blink faster
-             .to(this.barrier, 0.1, { alpha: 1, delay: 0.1}) // Last flicker
-             .to(this.barrier, 0.1, { alpha: 0 }); // Fade out
+        this.barrierTimeline
+            .to(this.barrier, 0.3, { alpha: 1 }) // Fade in
+            .to(this.barrier, 0.1, { alpha: 0, delay: 4.0, repeat: 10, yoyo: true }) // Blink fast towards end
+            .to(this.barrier, 0.5, { alpha: 1, delay: 1.0 }) // Stay solid longer
+            .to(this.barrier, 0.1, { alpha: 0, delay: 0.5, repeat: 6, yoyo: true }) // Blink faster
+            .to(this.barrier, 0.1, { alpha: 1, delay: 0.1 }) // Last flicker
+            .to(this.barrier, 0.1, { alpha: 0 }); // Fade out
     }
 
     barrierHitEffect() {
@@ -441,8 +473,8 @@ export class Player extends BaseUnit {
     // --- Damage & Death ---
     onDamage(amount) {
         if (this.barrierFlg || this.damageAnimationFlg || this.deadFlg) {
-             if (this.barrierFlg) this.barrierHitEffect(); // Show barrier hit even if no damage taken
-             return;
+            if (this.barrierFlg) this.barrierHitEffect(); // Show barrier hit even if no damage taken
+            return;
         }
 
         this.hp -= amount;
@@ -454,25 +486,25 @@ export class Player extends BaseUnit {
         this.damageAnimationFlg = true; // Prevent rapid damage calls
 
         if (this.hp <= 0) {
-             this.dead();
+            this.dead();
         } else {
-             // Damage flicker/knockback animation
-             const initialY = this.y;
-             const damageTimeline = new TimelineMax({
-                 onComplete: () => { this.damageAnimationFlg = false; this.y = initialY; } // Reset flag and position
-             });
+            // Damage flicker/knockback animation
+            const initialY = this.y;
+            const damageTimeline = new TimelineMax({
+                onComplete: () => { this.damageAnimationFlg = false; this.y = initialY; } // Reset flag and position
+            });
 
-             // Flicker effect
-             damageTimeline
-                 .to(this.unit, 0.1, { alpha: 0.2, tint: 0xFF0000 })
-                 .to(this.unit, 0.1, { alpha: 1.0, tint: 0xFFFFFF })
-                 .to(this.unit, 0.1, { alpha: 0.2, tint: 0xFF0000 })
-                 .to(this.unit, 0.1, { alpha: 1.0, tint: 0xFFFFFF })
-                 .to(this.unit, 0.1, { alpha: 0.2, tint: 0xFF0000 })
-                 .to(this.unit, 0.1, { alpha: 1.0, tint: 0xFFFFFF });
+            // Flicker effect
+            damageTimeline
+                .to(this.unit, 0.1, { alpha: 0.2, tint: 0xFF0000 })
+                .to(this.unit, 0.1, { alpha: 1.0, tint: 0xFFFFFF })
+                .to(this.unit, 0.1, { alpha: 0.2, tint: 0xFF0000 })
+                .to(this.unit, 0.1, { alpha: 1.0, tint: 0xFFFFFF })
+                .to(this.unit, 0.1, { alpha: 0.2, tint: 0xFF0000 })
+                .to(this.unit, 0.1, { alpha: 1.0, tint: 0xFFFFFF });
 
-             // Small shake (optional) - apply to the main player object (this)
-             damageTimeline
+            // Small shake (optional) - apply to the main player object (this)
+            damageTimeline
                 .to(this, 0.05, { y: initialY + 2 }, 0) // Start shake simultaneously
                 .to(this, 0.05, { y: initialY - 2 }, 0.05)
                 .to(this, 0.05, { y: initialY + 2 }, 0.10)
@@ -480,8 +512,8 @@ export class Player extends BaseUnit {
                 .to(this, 0.05, { y: initialY }, 0.20);
 
 
-             Sound.play('g_damage_voice');
-             Sound.play('se_damage');
+            Sound.play('g_damage_voice');
+            Sound.play('se_damage');
         }
     }
 
@@ -504,9 +536,9 @@ export class Player extends BaseUnit {
             this.explosionComplete(); // Complete immediately if no explosion
         }
 
-         // Clear existing bullets visually (manager should handle removal from list)
-         // this.bulletList.forEach(bullet => bullet.destroy());
-         // this.bulletList = [];
+        // Clear existing bullets visually (manager should handle removal from list)
+        // this.bulletList.forEach(bullet => bullet.destroy());
+        // this.bulletList = [];
 
         Sound.play('se_explosion');
         Sound.play('g_continue_no_voice0'); // Assuming this is the death voice
@@ -522,10 +554,10 @@ export class Player extends BaseUnit {
         super.castAdded(); // BaseUnit castAdded
         this.attachInputListeners();
         this.damageAnimationFlg = false;
-         this.unit.visible = true; // Ensure visibility on add
-         this.deadFlg = false; // Reset dead flag
-         this.hp = this.maxHp; // Reset HP? Or use gameState.playerHp?
-         this._percent = 1.0;
+        this.unit.visible = true; // Ensure visibility on add
+        this.deadFlg = false; // Reset dead flag
+        this.hp = this.maxHp; // Reset HP? Or use gameState.playerHp?
+        this._percent = 1.0;
     }
 
     castRemoved() {
@@ -537,22 +569,23 @@ export class Player extends BaseUnit {
         super.castRemoved();
     }
 
-     // Override destroy for thorough cleanup
-     destroy(options) {
+    // Override destroy for thorough cleanup
+    destroy(options) {
         console.log("Player destroy called");
-         this.detachInputListeners();
-         if (this.barrier) this.barrier.destroy();
-         if (this.barrierEffect) this.barrierEffect.destroy();
-         if (this.barrierTimeline) this.barrierTimeline.kill();
-         // dragAreaRect is handled by the scene
+        this.detachInputListeners();
+        if (this.barrier) this.barrier.destroy();
+        if (this.barrierEffect) this.barrierEffect.destroy();
+        if (this.barrierTimeline) this.barrierTimeline.kill();
+        // dragAreaRect is handled by the scene
 
-         this.barrier = null;
-         this.barrierEffect = null;
-         this.barrierTimeline = null;
-         this.keyDownListener = null;
-         this.keyUpListener = null;
-         this.bulletList = []; // Clear list
+        this.barrier = null;
+        this.barrierEffect = null;
+        this.barrierTimeline = null;
+        this.keyDownListener = null;
+        this.keyUpListener = null;
+        this.bulletList = []; // Clear list
+        this.gameScene = null;
 
-         super.destroy(options); // Call BaseUnit destroy
-     }
+        super.destroy(options); // Call BaseUnit destroy
+    }
 }

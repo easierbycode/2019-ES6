@@ -145,10 +145,12 @@ export class GameScene extends BaseScene {
 
 
         this.player = new Player(playerData);
+        this.player.setGameScene(this);
         // Listen for player bullet creation events
         this.player.on(Player.CUSTOM_EVENT_BULLET_ADD, this.handlePlayerShoot.bind(this));
         this.player.on(Player.CUSTOM_EVENT_DEAD, this.gameover.bind(this));
         this.player.on(Player.CUSTOM_EVENT_DEAD_COMPLETE, this.gameoverComplete.bind(this));
+        this.player.on(Player.CUSTOM_EVENT_CA_FIRE, this.caFire.bind(this));
         gameState.playerRef = this.player; // Update global reference
         this.player.setUp(gameState.playerHp, gameState.shootMode, gameState.shootSpeed); // Use current game state
         this.player.position.set(
@@ -1117,7 +1119,7 @@ export class GameScene extends BaseScene {
     }
 
     caFire() {
-        if (this.theWorldFlg || !this.hud.cagageFlg) return; // Prevent CA during freeze or if not ready
+        if (this.theWorldFlg) return; // Prevent CA during freeze or if already active
 
         Utils.dlog("CA Fire!");
         this.theWorldFlg = true;
@@ -1125,115 +1127,157 @@ export class GameScene extends BaseScene {
         if (this.boss) this.boss.onTheWorld(true); // Freeze boss
         if (this.player) this.player.shootStop(); // Stop player shooting
 
-        // Clear existing bullets (managed by player now)
-        if (this.player && this.player.bulletList) {
-            [...this.player.bulletList].forEach(b => {
-                this.player.bulletRemove(b);
-                this.player.bulletRemoveComplete(b);
+        // Clear existing player bullets
+        if (this.player && Array.isArray(this.player.bulletList)) {
+            [...this.player.bulletList].forEach(bullet => {
+                this.player.bulletRemove(bullet);
+                this.player.bulletRemoveComplete(bullet);
             });
         }
-        // Consider clearing enemy bullets too?
-        // this.enemyBullets.forEach(b => this.removeEnemyBullet(b, -1));
 
-        // Show Cutin
-        this.overlayContainer.addChild(this.cutinCont);
-        this.cutinCont.start();
-
-        // Setup CA Line graphic
-        if (!this.caLine) {
-            this.caLine = new PIXI.Graphics()
-                .beginFill(0xFF0000) // Red
-                .drawRect(-1.5, 0, 3, 1) // Start as thin line at pivot
-                .endFill();
-            this.caLine.pivot.y = 0; // Pivot at the top
+        // Ensure cut-in plays from overlay container
+        if (this.cutinCont) {
+            if (this.cutinCont.parent && this.cutinCont.parent !== this.overlayContainer) {
+                this.cutinCont.parent.removeChild(this.cutinCont);
+            }
+            if (!this.cutinCont.parent) {
+                this.overlayContainer.addChild(this.cutinCont);
+            }
+            this.cutinCont.start();
         }
-        this.caLine.scale.y = 1; // Reset scale
-        this.caLine.position.set(this.player.x, this.player.y); // Start at player
-        this.overlayContainer.addChild(this.caLine);
 
+        // Setup CA Line graphic (matches original dimensions/pivot)
+        if (!this.caLine) {
+            this.caLine = new PIXI.Graphics();
+            this.caLine.beginFill(0xFF0000);
+            this.caLine.drawRect(0, 0, 3, 3);
+            this.caLine.pivot.y = 3;
+            this.caLine.endFill();
+        }
+        this.caLine.height = 3;
+        this.caLine.alpha = 1;
 
-        // CA Timeline
-        const tl = new TimelineMax();
-        tl.addCallback(() => Sound.play('g_ca_voice'), 0.2)
-            .addCallback(() => { // Remove cutin after it finishes
-                if (this.cutinCont.parent) this.overlayContainer.removeChild(this.cutinCont);
-            }, 1.9) // Matches original delay calculation (0.2 + 1.7)
-            .to(this.caLine.scale, 0.3, { // Expand line upwards
-                y: Constants.GAME_DIMENSIONS.HEIGHT * 2, // Make sure it covers screen
-                ease: Power1.easeIn // Fast expansion
-            }, 1.9) // Start expanding after cutin removal
-            .addCallback(() => Sound.play('se_ca'), "<") // Play sound as line expands
-            .to(this.caLine, 0.1, { alpha: 0 }, "+=0.1") // Quickly fade line
-            .addCallback(() => { // Start explosions slightly before line fades
-                this.triggerCAExplosions();
-                this.applyCADamage();
-            }, "-=0.05")
-            .addCallback(() => { // Cleanup and unfreeze
-                if (this.caLine.parent) this.overlayContainer.removeChild(this.caLine);
+        const caBase = this.getPlayerCaBasePosition();
+        this.caLine.x = caBase.x + 12;
+        this.caLine.y = caBase.y + 5;
+
+        if (this.caLine.parent !== this.unitContainer) {
+            if (this.caLine.parent) this.caLine.parent.removeChild(this.caLine);
+            this.unitContainer.addChild(this.caLine);
+        }
+
+        const timeline = new TimelineMax();
+        timeline.call(() => Sound.play('g_ca_voice'), null, this, "+=0.2")
+            .call(() => {
+                if (this.cutinCont && this.cutinCont.parent === this.overlayContainer) {
+                    this.overlayContainer.removeChild(this.cutinCont);
+                }
+            }, null, this, "+=1.7")
+            .to(this.caLine, 0.3, {
+                height: Constants.GAME_DIMENSIONS.HEIGHT
+            })
+            .to(this.caLine, 0.3, {
+                y: 0,
+                height: 0
+            })
+            .call(() => this.triggerCAExplosions(caBase), null, this, "-=0.1")
+            .call(() => this.applyCADamage(), null, this, "+=0.8")
+            .call(() => {
+                if (this.caLine && this.caLine.parent) {
+                    this.caLine.parent.removeChild(this.caLine);
+                }
                 this.theWorldFlg = false;
                 this.hud.caFireFlg = false;
-                // Resume boss only if it's still alive
-                if (this.boss && this.boss.hp > 0) {
-                    this.boss.onTheWorld(false);
+                if (this.boss) {
+                    if (this.boss.hp <= 0) {
+                        this.theWorldFlg = true;
+                    } else {
+                        this.boss.onTheWorld(false);
+                    }
                 }
-                // Don't restart player shooting here, maybe resume on user input?
-            }, "+=1.0"); // Total duration approx 1.9 + 0.3 + 1.0 = 3.2s
+            }, null, this, "+=0.7");
 
         // Reset HUD CA gauge
         this.hud.cagageCount = 0;
     }
 
-    triggerCAExplosions() {
-        const numExplosions = 64;
-        const explosionsPerRow = 8;
-        const explosionWidth = 30;
-        const explosionHeight = 45;
-        const startY = Constants.GAME_DIMENSIONS.HEIGHT - 120;
+    getPlayerCaBasePosition() {
+        if (!this.player) {
+            return new PIXI.Point(Constants.GAME_DIMENSIONS.CENTER_X, Constants.GAME_DIMENSIONS.HEIGHT - 120);
+        }
+        const bounds = this.player.getBounds();
+        const globalCenter = new PIXI.Point(bounds.x + bounds.width / 2, bounds.y + bounds.height / 2);
+        return this.unitContainer.toLocal(globalCenter);
+    }
 
-        for (let i = 0; i < numExplosions; i++) {
-            const row = Math.floor(i / explosionsPerRow);
-            const col = i % explosionsPerRow;
-            const offsetX = (row % 2 === 0) ? -explosionWidth / 2 : -explosionWidth; // Stagger rows
-            const posX = col * explosionWidth + offsetX;
-            const posY = startY - row * explosionHeight;
+    triggerCAExplosions(basePosition) {
+        if (!this.caExplosionTextures || this.caExplosionTextures.length === 0) return;
 
-            const explosion = new PIXI.AnimatedSprite(this.caExplosionTextures);
+        const origin = basePosition || this.getPlayerCaBasePosition();
+        const totalExplosions = 64;
+        let rowIndex = 0;
+        let offsetX = 0;
+
+        for (let i = 0; i < totalExplosions; i++) {
+            if (i % 8 === 0) {
+                offsetX = (rowIndex % 2 === 0) ? -30 : -45;
+                rowIndex++;
+            }
+
+            const explosion = new PIXI.extras.AnimatedSprite(this.caExplosionTextures);
             explosion.animationSpeed = 0.2;
             explosion.loop = false;
-            explosion.anchor.set(0.5);
-            explosion.position.set(posX, posY);
-            explosion.onComplete = () => explosion.destroy(); // Auto-destroy
+            explosion.x = origin.x + offsetX;
+            explosion.y = Constants.GAME_DIMENSIONS.HEIGHT - (45 * rowIndex) - 120;
+            explosion.onComplete = () => {
+                if (explosion.parent) explosion.parent.removeChild(explosion);
+                explosion.destroy();
+            };
 
-            // Delay start of each explosion
-            TweenMax.delayedCall(i * 0.01, () => {
-                this.overlayContainer.addChild(explosion); // Add to overlay container
+            offsetX += 30;
+
+            TweenMax.delayedCall(0.01 * i, () => {
+                this.unitContainer.addChild(explosion);
                 explosion.play();
-                if (i % 16 === 0) Sound.play('se_ca_explosion'); // Play sound periodically
+                if (i % 16 === 0) Sound.play('se_ca_explosion');
             });
         }
     }
 
     applyCADamage() {
         const damageAmount = gameState.caDamage;
-        const targets = [...this.enemies]; // Damage all current enemies
+        const targets = this.enemies.slice();
+        if (targets.length === 0) return;
+
+        const isWithinScreen = (enemy) => {
+            if (!enemy || enemy.deadFlg || !enemy.parent) return false;
+            if (enemy.unit) {
+                const unitWidth = enemy.unit.width || enemy.width || 0;
+                const unitX = enemy.unit.x;
+                const unitY = enemy.unit.y;
+                if (unitX < -unitWidth / 2 || unitX > Constants.GAME_DIMENSIONS.WIDTH) return false;
+                if (unitY < 20 || unitY > Constants.GAME_DIMENSIONS.HEIGHT) return false;
+                return true;
+            }
+            const bounds = enemy.getBounds();
+            return bounds.x + bounds.width > 0 && bounds.x < Constants.GAME_DIMENSIONS.WIDTH &&
+                bounds.y + bounds.height > 20 && bounds.y < Constants.GAME_DIMENSIONS.HEIGHT;
+        };
+
+        const applyDirectly = targets.length >= 100;
 
         targets.forEach((enemy, index) => {
-            // Check if enemy is on screen and alive
-            if (enemy && !enemy.deadFlg && enemy.parent) {
-                const bounds = enemy.getBounds();
-                if (bounds.y + bounds.height > 20 && bounds.y < Constants.GAME_DIMENSIONS.HEIGHT &&
-                    bounds.x + bounds.width > 0 && bounds.x < Constants.GAME_DIMENSIONS.WIDTH) {
-                    // Apply damage with slight delay for effect
-                    TweenMax.delayedCall(index * 0.005, () => {
-                        if (enemy && !enemy.deadFlg) { // Double check enemy is still valid
-                            enemy.onDamage(damageAmount);
-                            // Check if enemy died AFTER applying damage
-                            if (enemy.hp <= 0) {
-                                this.handleEnemyRemoved(enemy);
-                            }
-                        }
-                    });
-                }
+            if (!isWithinScreen(enemy)) return;
+
+            const applyDamage = () => {
+                if (!enemy || enemy.deadFlg) return;
+                enemy.onDamage(damageAmount);
+            };
+
+            if (applyDirectly) {
+                applyDamage();
+            } else {
+                TweenMax.delayedCall(0.005 * index, applyDamage);
             }
         });
     }

@@ -3,6 +3,7 @@ import { BaseCast } from '../BaseCast.js'; // Assuming BaseCast is in the parent
 import * as Constants from '../constants.js';
 import * as Utils from '../utils.js';
 import * as Sound from '../soundManager.js'; // <<< ADDED IMPORT
+import { gameState } from '../gameState.js';
 import { SmallNumberDisplay } from './SmallNumberDisplay.js';
 import { ComboNumberDisplay } from './ComboNumberDisplay.js';
 import { CaButton } from './CaButton.js'; // Assuming CaButton is in the ui directory
@@ -123,7 +124,13 @@ export class HUD extends BaseCast {
         this.cagageCount = 0; // Reset CA gauge (use setter)
         this.cagaBtn?.triggerCaFire(); // Reset button visual state
         this.caBtnDeactive(); // Deactivate button input
-        this.emit(HUD.CUSTOM_EVENT_CA_FIRE); // Emit event for GameScene
+
+        const player = gameState.playerRef;
+        const triggered = player && typeof player.caFire === 'function' ? player.caFire() : false;
+
+        if (!triggered) {
+            this.emit(HUD.CUSTOM_EVENT_CA_FIRE); // Fallback if player reference unavailable
+        }
     }
 
     caBtnActive() {
