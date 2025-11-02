@@ -235,20 +235,6 @@ export class Player extends BaseUnit {
         } else if (this.shootOn && this.bulletFrameCnt % shootInterval === 0) {
             this.shoot();
         }
-
-        // Update and cleanup bullets (from app_formatted.js lines 888-894)
-        for (let i = this.bulletList.length - 1; i >= 0; i--) {
-            const bullet = this.bulletList[i];
-            bullet.loop(delta); // Update bullet animation/state
-            bullet.unit.x += 3.5 * Math.cos(bullet.unit.rotation);
-            bullet.unit.y += 3.5 * Math.sin(bullet.unit.rotation);
-
-            // Remove bullets that go off-screen
-            if (bullet.unit.y <= 40 || bullet.unit.x <= -bullet.unit.width || bullet.unit.x >= Constants.GAME_DIMENSIONS.WIDTH) {
-                this.bulletRemove(bullet);
-                this.bulletRemoveComplete(bullet);
-            }
-        }
     }
 
      // Override BaseUnit's updateShadowPosition if Player's shadow behaves differently
@@ -279,9 +265,6 @@ export class Player extends BaseUnit {
                     bullet.id = this.bulletIdCnt++;
                     bullet.shadowReverse = false;
                     bullet.shadowOffsetY = 0;
-                    bullet.on(BaseUnit.CUSTOM_EVENT_DEAD, this.bulletRemove.bind(this, bullet));
-                    bullet.on(BaseUnit.CUSTOM_EVENT_DEAD_COMPLETE, this.bulletRemoveComplete.bind(this, bullet));
-                    this.addChild(bullet);
                     bullets.push(bullet);
                     this.bulletList.push(bullet);
                     Sound.stop('se_shoot');
@@ -298,9 +281,6 @@ export class Player extends BaseUnit {
                     bullet.id = this.bulletIdCnt++;
                     bullet.shadowReverse = false;
                     bullet.shadowOffsetY = 0;
-                    bullet.on(BaseUnit.CUSTOM_EVENT_DEAD, this.bulletRemove.bind(this, bullet));
-                    bullet.on(BaseUnit.CUSTOM_EVENT_DEAD_COMPLETE, this.bulletRemoveComplete.bind(this, bullet));
-                    this.addChild(bullet);
                     bullets.push(bullet);
                     this.bulletList.push(bullet);
                     Sound.stop('se_shoot_b');
@@ -327,9 +307,6 @@ export class Player extends BaseUnit {
                         bullet.id = this.bulletIdCnt++;
                         bullet.shadowReverse = false;
                         bullet.shadowOffsetY = 0;
-                        bullet.on(BaseUnit.CUSTOM_EVENT_DEAD, this.bulletRemove.bind(this, bullet));
-                        bullet.on(BaseUnit.CUSTOM_EVENT_DEAD_COMPLETE, this.bulletRemoveComplete.bind(this, bullet));
-                        this.addChild(bullet);
                         bullets.push(bullet);
                         this.bulletList.push(bullet);
                     }
@@ -339,24 +316,12 @@ export class Player extends BaseUnit {
                 }
         }
 
-        // Bullets are now managed by Player directly (as children)
-        // No need to emit to GameScene
+        // Emit event with bullet objects for GameScene to add to bulletContainer
+        this.emit(Player.CUSTOM_EVENT_BULLET_ADD, bullets);
     }
 
-    bulletRemove(bullet) {
-        for (let i = 0; i < this.bulletList.length; i++) {
-            if (bullet.id === this.bulletList[i].id) {
-                this.bulletList.splice(i, 1);
-                break;
-            }
-        }
-    }
-
-    bulletRemoveComplete(bullet) {
-        bullet.off(BaseUnit.CUSTOM_EVENT_DEAD, this.bulletRemove.bind(this, bullet));
-        bullet.off(BaseUnit.CUSTOM_EVENT_DEAD_COMPLETE, this.bulletRemoveComplete.bind(this, bullet));
-        this.removeChild(bullet);
-    }
+    // Bullet management now handled by GameScene
+    // bulletRemove and bulletRemoveComplete methods no longer needed
 
     updateShootData() {
          switch (this.shootMode) {

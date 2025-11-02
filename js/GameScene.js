@@ -145,7 +145,8 @@ export class GameScene extends BaseScene {
 
 
         this.player = new Player(playerData);
-        // Bullets are now managed by Player directly (no need for CUSTOM_EVENT_BULLET_ADD handler)
+        // Listen for player bullet creation events
+        this.player.on(Player.CUSTOM_EVENT_BULLET_ADD, this.handlePlayerShoot.bind(this));
         this.player.on(Player.CUSTOM_EVENT_DEAD, this.gameover.bind(this));
         this.player.on(Player.CUSTOM_EVENT_DEAD_COMPLETE, this.gameoverComplete.bind(this));
         gameState.playerRef = this.player; // Update global reference
@@ -289,7 +290,20 @@ export class GameScene extends BaseScene {
 
         // Player Loop (already handles movement, shooting logic internally)
         // Player's loop is called by BaseScene's loop if it exists
-        // Player bullets are updated and cleaned up in Player.loop()
+
+        // Update Player Bullets (managed by player now)
+        if (this.player && this.player.bulletList) {
+            for (let i = this.player.bulletList.length - 1; i >= 0; i--) {
+                const bullet = this.player.bulletList[i];
+                bullet.loop(delta);
+                // Check off-screen using global position (bullets are children of player)
+                const globalPos = bullet.getGlobalPosition();
+                if (globalPos.y < -bullet.height || globalPos.x < -bullet.width || globalPos.x > Constants.GAME_DIMENSIONS.WIDTH + bullet.width) {
+                    this.player.bulletRemove(bullet);
+                    this.player.bulletRemoveComplete(bullet);
+                }
+            }
+        }
 
         // Update Enemy Bullets
         for (let i = this.enemyBullets.length - 1; i >= 0; i--) {
@@ -404,11 +418,11 @@ export class GameScene extends BaseScene {
         if (this.player && this.player.bulletList) {
             for (let i = this.player.bulletList.length - 1; i >= 0; i--) {
                 const bullet = this.player.bulletList[i];
-                if (!bullet || bullet.deadFlg) continue;
+                if (bullet.deadFlg) continue;
 
                 for (let j = this.enemies.length - 1; j >= 0; j--) {
                     const enemy = this.enemies[j];
-                    if (!enemy || enemy.deadFlg) continue;
+                    if (enemy.deadFlg) continue;
 
                     // Check visibility and basic distance? Optional optimization
                     // if (!enemy.visible || Math.abs(bullet.x - enemy.x) > 100) continue;
