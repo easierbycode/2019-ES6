@@ -1018,8 +1018,7 @@ export class GameScene extends BaseScene {
             // Clear player bullets (managed by player now)
             if (this.player.bulletList) {
                 [...this.player.bulletList].forEach(b => {
-                    this.player.bulletRemove(b);
-                    this.player.bulletRemoveComplete(b);
+                    this.player.removeChild(b);
                 });
             }
         }
