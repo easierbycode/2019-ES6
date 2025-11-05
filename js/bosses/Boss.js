@@ -248,7 +248,7 @@ export class Boss extends BaseUnit {
          explosionInstance.y = (Math.random() - 0.5) * this.unit.hitArea.height;
 
          explosionInstance.onComplete = () => {
-            this.explosionComplete(explosionInstance, isLast && (this.explotionCnt === 5));
+            this.explosionComplete(explosionInstance, isLast && (this.explotionCnt === 4));
             explosionInstance.destroy(); // Clean up clone
          };
 
