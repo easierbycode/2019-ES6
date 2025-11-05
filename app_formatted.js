@@ -4283,6 +4283,7 @@
         }, {
             key: "onDead",
             value: function() {
+                this.emit(y.CUSTOM_EVENT_DEAD),
                 this.tlShoot && (this.tlShoot.pause(),
                 this.tlShoot.kill()),
                 g.play("boss_bison_voice_ko")
