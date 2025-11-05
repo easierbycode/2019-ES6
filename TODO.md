@@ -1,8 +1,6 @@
 TODO
 ====
 
-BossBison (Balrog) on death plays explosion anim and sound but nextScene not called
-
 Player - ondrag or keyup player disappears (double loop call from BaseScene?)
 
 soliderA bullets need to be rotated (-90)
