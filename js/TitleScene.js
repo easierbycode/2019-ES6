@@ -11,6 +11,7 @@ import { TwitterButton } from './ui/TwitterButton.js';
 import { StaffrollPanel } from './ui/StaffrollPanel.js'; // Import Panel
 import { BigNumberDisplay } from './ui/BigNumberDisplay.js';
 import { AdvScene } from './AdvScene.js'; // Import next scene
+import { LoadScene } from './LoadScene.js';
 
 export class TitleScene extends BaseScene {
     constructor() {
