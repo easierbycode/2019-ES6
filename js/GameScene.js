@@ -1119,88 +1119,105 @@ export class GameScene extends BaseScene {
     }
 
     caFire() {
-        if (this.theWorldFlg) return; // Prevent CA during freeze or if already active
-
-        Utils.dlog("CA Fire!");
         this.theWorldFlg = true;
-        this.hud.caFireFlg = true; // Mark that CA is active
-        if (this.boss) this.boss.onTheWorld(true); // Freeze boss
-        if (this.player) this.player.shootStop(); // Stop player shooting
-
-        // Clear existing player bullets
-        if (this.player && Array.isArray(this.player.bulletList)) {
-            [...this.player.bulletList].forEach(bullet => {
-                this.player.bulletRemove(bullet);
-                this.player.bulletRemoveComplete(bullet);
-            });
+        this.hud.caFireFlg = true;
+        if (this.boss) {
+            this.boss.onTheWorld(this.theWorldFlg);
         }
+        this.addChild(this.cutinCont);
+        this.cutinCont.start();
+        this.caLine.x = this.player.unit.x + 12;
+        this.caLine.y = this.player.unit.y + 5;
+        this.unitContainer.addChild(this.caLine);
 
-        // Ensure cut-in plays from overlay container
-        if (this.cutinCont) {
-            if (this.cutinCont.parent && this.cutinCont.parent !== this.overlayContainer) {
-                this.cutinCont.parent.removeChild(this.cutinCont);
-            }
-            if (!this.cutinCont.parent) {
-                this.overlayContainer.addChild(this.cutinCont);
-            }
-            this.cutinCont.start();
-        }
-
-        // Setup CA Line graphic (matches original dimensions/pivot)
-        if (!this.caLine) {
-            this.caLine = new PIXI.Graphics();
-            this.caLine.beginFill(0xFF0000);
-            this.caLine.drawRect(0, 0, 3, 3);
-            this.caLine.pivot.y = 3;
-            this.caLine.endFill();
-        }
-        this.caLine.height = 3;
-        this.caLine.alpha = 1;
-
-        const caBase = this.getPlayerCaBasePosition();
-        this.caLine.x = caBase.x + 12;
-        this.caLine.y = caBase.y + 5;
-
-        if (this.caLine.parent !== this.unitContainer) {
-            if (this.caLine.parent) this.caLine.parent.removeChild(this.caLine);
-            this.unitContainer.addChild(this.caLine);
+        for (let i = 0; i < this.player.bulletList.length; i++) {
+            const bullet = this.player.bulletList[i];
+            this.player.bulletRemove(bullet);
+            this.player.bulletRemoveComplete(bullet);
         }
 
         const timeline = new TimelineMax();
-        timeline.call(() => Sound.play('g_ca_voice'), null, this, "+=0.2")
-            .call(() => {
-                if (this.cutinCont && this.cutinCont.parent === this.overlayContainer) {
-                    this.overlayContainer.removeChild(this.cutinCont);
-                }
-            }, null, this, "+=1.7")
-            .to(this.caLine, 0.3, {
-                height: Constants.GAME_DIMENSIONS.HEIGHT
-            })
-            .to(this.caLine, 0.3, {
-                y: 0,
-                height: 0
-            })
-            .call(() => this.triggerCAExplosions(caBase), null, this, "-=0.1")
-            .call(() => this.applyCADamage(), null, this, "+=0.8")
-            .call(() => {
-                if (this.caLine && this.caLine.parent) {
-                    this.caLine.parent.removeChild(this.caLine);
-                }
-                this.theWorldFlg = false;
-                this.hud.caFireFlg = false;
-                // Restart player shooting after CA animation completes
-                if (this.player) this.player.shootStart();
-                if (this.boss) {
-                    if (this.boss.hp <= 0) {
-                        this.theWorldFlg = true;
-                    } else {
-                        this.boss.onTheWorld(false);
-                    }
-                }
-            }, null, this, "+=0.7");
+        timeline.call(() => {
+            Sound.play("g_ca_voice");
+        }, null, this, "+=0.2");
+        timeline.call(() => {
+            this.removeChild(this.cutinCont);
+        }, null, this, "+=1.7");
+        timeline.to(this.caLine, 0.3, {
+            height: Constants.GAME_DIMENSIONS.HEIGHT
+        });
+        timeline.to(this.caLine, 0.3, {
+            y: 0,
+            height: 0
+        });
+        timeline.call(() => {
+            for (let i = 0; i < 64; i++) {
+                const explosion = new PIXI.extras.AnimatedSprite(this.caExplosionTextures);
+                explosion.animationSpeed = 0.2;
+                explosion.loop = false;
+                let rowIndex = Math.floor(i / 8);
+                let offsetX = (rowIndex % 2 === 0) ? -30 : -45;
+                explosion.x = (this.player.unit.x + 12) + offsetX + (i % 8 * 30);
+                explosion.y = Constants.GAME_DIMENSIONS.HEIGHT - (45 * rowIndex) - 120;
+                explosion.onComplete = () => {
+                    if (explosion.parent) explosion.parent.removeChild(explosion);
+                    explosion.destroy();
+                };
+                TweenMax.delayedCall(0.01 * i, () => {
+                    this.unitContainer.addChild(explosion);
+                    explosion.play();
+                    if (i % 16 === 0) Sound.play('se_ca_explosion');
+                });
+            }
+        }, null, this, "-=0.1");
+        timeline.call(() => {
+            const damageAmount = gameState.caDamage;
+            const targets = this.enemies.slice();
+            if (targets.length === 0) return;
 
-        // Reset HUD CA gauge
-        this.hud.cagageCount = 0;
+            const isWithinScreen = (enemy) => {
+                if (!enemy || enemy.deadFlg || !enemy.parent) return false;
+                if (enemy.unit) {
+                    const unitWidth = enemy.unit.width || enemy.width || 0;
+                    const unitX = enemy.unit.x;
+                    const unitY = enemy.unit.y;
+                    if (unitX < -unitWidth / 2 || unitX > Constants.GAME_DIMENSIONS.WIDTH) return false;
+                    if (unitY < 20 || unitY > Constants.GAME_DIMENSIONS.HEIGHT) return false;
+                    return true;
+                }
+                const bounds = enemy.getBounds();
+                return bounds.x + bounds.width > 0 && bounds.x < Constants.GAME_DIMENSIONS.WIDTH &&
+                    bounds.y + bounds.height > 20 && bounds.y < Constants.GAME_DIMENSIONS.HEIGHT;
+            };
+
+            const applyDirectly = targets.length >= 100;
+
+            targets.forEach((enemy, index) => {
+                if (!isWithinScreen(enemy)) return;
+
+                const applyDamage = () => {
+                    if (!enemy || enemy.deadFlg) return;
+                    enemy.onDamage(damageAmount);
+                };
+
+                if (applyDirectly) {
+                    applyDamage();
+                } else {
+                    TweenMax.delayedCall(0.005 * index, applyDamage);
+                }
+            });
+        }, null, this, "+=0.8");
+        timeline.call(() => {
+            this.theWorldFlg = false;
+            this.hud.caFireFlg = false;
+            if (this.boss) {
+                if (this.boss.hp <= 0) {
+                    this.theWorldFlg = true;
+                } else {
+                    this.boss.onTheWorld(this.theWorldFlg);
+                }
+            }
+        }, null, this, "+=0.7");
     }
 
     getPlayerCaBasePosition() {
@@ -1246,43 +1263,6 @@ export class GameScene extends BaseScene {
         }
     }
 
-    applyCADamage() {
-        const damageAmount = gameState.caDamage;
-        const targets = this.enemies.slice();
-        if (targets.length === 0) return;
-
-        const isWithinScreen = (enemy) => {
-            if (!enemy || enemy.deadFlg || !enemy.parent) return false;
-            if (enemy.unit) {
-                const unitWidth = enemy.unit.width || enemy.width || 0;
-                const unitX = enemy.unit.x;
-                const unitY = enemy.unit.y;
-                if (unitX < -unitWidth / 2 || unitX > Constants.GAME_DIMENSIONS.WIDTH) return false;
-                if (unitY < 20 || unitY > Constants.GAME_DIMENSIONS.HEIGHT) return false;
-                return true;
-            }
-            const bounds = enemy.getBounds();
-            return bounds.x + bounds.width > 0 && bounds.x < Constants.GAME_DIMENSIONS.WIDTH &&
-                bounds.y + bounds.height > 20 && bounds.y < Constants.GAME_DIMENSIONS.HEIGHT;
-        };
-
-        const applyDirectly = targets.length >= 100;
-
-        targets.forEach((enemy, index) => {
-            if (!isWithinScreen(enemy)) return;
-
-            const applyDamage = () => {
-                if (!enemy || enemy.deadFlg) return;
-                enemy.onDamage(damageAmount);
-            };
-
-            if (applyDirectly) {
-                applyDamage();
-            } else {
-                TweenMax.delayedCall(0.005 * index, applyDamage);
-            }
-        });
-    }
 
     stageClear() {
         Utils.dlog("GameScene.stageClear()");

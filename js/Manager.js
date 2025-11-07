@@ -34,13 +34,14 @@ export class Manager {
     }
 
     switchToScene(SceneClass, sceneId) {
-         if (this.currentScene) {
-             // Remove the old scene cleanly
-             globals.pixiApp.stage.removeChild(this.currentScene);
-             // Destroy should be called automatically via 'removed' event in BaseScene
-             // this.currentScene.destroy({ children: true });
-             this.currentScene = null;
-         }
+        if (this.currentScene) {
+            // Remove the old scene cleanly
+            globals.pixiApp.stage.removeChild(this.currentScene);
+            if (typeof this.currentScene.destroy === 'function') {
+                this.currentScene.destroy({ children: true });
+            }
+            this.currentScene = null;
+        }
 
          // Create and add the new scene
          this.currentScene = new SceneClass(sceneId); // Pass ID if needed
