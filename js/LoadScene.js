@@ -276,6 +276,25 @@ export class LoadScene extends BaseScene {
         }
     }
 
+    loop(delta) {
+        super.loop(delta); // BaseScene loop
+
+        // Rotate background texture
+        if (this.loadingBg && this.loadingTexture) {
+            this.loadingBgFlipCnt += delta;
+            if (this.loadingBgFlipCnt >= 6) { // Approx every 6 frames at 60fps
+                this.loadingBgFlipCnt = 0;
+                if (this.loadingBg.name === "ura") {
+                    this.loadingBg.name = "omote";
+                    this.loadingTexture.rotate = 0;
+                } else {
+                    this.loadingBg.name = "ura";
+                    this.loadingTexture.rotate = 8; // PIXI uses values 0, 2, 4, 6, 8, ... for rotation
+                }
+            }
+        }
+    }
+
     recommendModalOpen() {
         if (!this.recommendModal) return;
         Utils.dlog("Opening recommend modal");

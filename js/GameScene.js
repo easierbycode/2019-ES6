@@ -180,6 +180,12 @@ export class GameScene extends BaseScene {
 
         this.cutinCont = new CutinContainer(); // Uses game_ui.json textures
 
+        this.caLine = new PIXI.Graphics();
+        this.caLine.beginFill(0xFF0000);
+        this.caLine.drawRect(0, 0, 3, 3);
+        this.caLine.pivot.y = 3;
+        this.caLine.endFill();
+
         const coverTexture = gameAssetResource.textures["stagebgOver.gif"];
         if (coverTexture) {
             this.cover = new PIXI.extras.TilingSprite(coverTexture, Constants.GAME_DIMENSIONS.WIDTH, Constants.GAME_DIMENSIONS.HEIGHT);
