@@ -11,7 +11,7 @@ TypeError: Cannot read properties of null (reading 'off')
     at t.update (http://localhost:8001/games/2019/js/pixi.min.js:16:19110)
     at _tick (http://localhost:8001/games/2019/js/pixi.min.js:16:17293)
 
-special shows line, dialog, and explosions but does not damage enemies
+add gamepad support to continue screen, minimally start should click YES buttton
 
 HUD - rename ca -> sp
 

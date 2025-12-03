@@ -1253,17 +1253,13 @@ export class GameScene extends BaseScene {
 
         const isWithinScreen = (enemy) => {
             if (!enemy || enemy.deadFlg || !enemy.parent) return false;
-            if (enemy.unit) {
-                const unitWidth = enemy.unit.width || enemy.width || 0;
-                const unitX = enemy.unit.x;
-                const unitY = enemy.unit.y;
-                if (unitX < -unitWidth / 2 || unitX > Constants.GAME_DIMENSIONS.WIDTH) return false;
-                if (unitY < 20 || unitY > Constants.GAME_DIMENSIONS.HEIGHT) return false;
-                return true;
-            }
-            const bounds = enemy.getBounds();
-            return bounds.x + bounds.width > 0 && bounds.x < Constants.GAME_DIMENSIONS.WIDTH &&
-                bounds.y + bounds.height > 20 && bounds.y < Constants.GAME_DIMENSIONS.HEIGHT;
+            // Use enemy container position (matches original app_formatted.js logic)
+            const unitWidth = enemy.unit?.width || enemy.width || 0;
+            const posX = enemy.x;
+            const posY = enemy.y;
+            if (posX < -unitWidth / 2 || posX > Constants.GAME_DIMENSIONS.WIDTH) return false;
+            if (posY < 20 || posY > Constants.GAME_DIMENSIONS.HEIGHT) return false;
+            return true;
         };
 
         const applyDirectly = targets.length >= 100;
