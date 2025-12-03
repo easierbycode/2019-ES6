@@ -26,7 +26,9 @@ export class App {
             autoDensity: true,
             backgroundColor: 0x000000, // Black background
         });
-        globals.pixiApp = app; // Store globally
+        // Store globally
+        globals.pixiApp = app;
+        globalThis.__PIXI_APP__ = app;
 
         // Add the canvas to the DOM
         const canvasContainer = document.getElementById("canvas"); // Ensure this div exists in your HTML
