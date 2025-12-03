@@ -1247,41 +1247,33 @@ export class GameScene extends BaseScene {
     }
 
     applyCADamage() {
-        const damageAmount = gameState.caDamage;
         const targets = this.enemies.slice();
-        if (targets.length === 0) return;
 
-        const isWithinScreen = (enemy) => {
-            if (!enemy || enemy.deadFlg || !enemy.parent) return false;
-            if (enemy.unit) {
-                const unitWidth = enemy.unit.width || enemy.width || 0;
-                const unitX = enemy.unit.x;
-                const unitY = enemy.unit.y;
-                if (unitX < -unitWidth / 2 || unitX > Constants.GAME_DIMENSIONS.WIDTH) return false;
-                if (unitY < 20 || unitY > Constants.GAME_DIMENSIONS.HEIGHT) return false;
-                return true;
+        if (targets.length >= 100) {
+            // Apply damage immediately for large numbers of enemies
+            for (let i = 0; i < targets.length; i++) {
+                const enemy = targets[i];
+                if (enemy.unit.x >= -enemy.unit.width / 2 &&
+                    enemy.unit.x <= Constants.GAME_DIMENSIONS.WIDTH &&
+                    enemy.unit.y >= 20 &&
+                    enemy.unit.y <= Constants.GAME_DIMENSIONS.HEIGHT) {
+                    enemy.onDamage(gameState.caDamage);
+                }
             }
-            const bounds = enemy.getBounds();
-            return bounds.x + bounds.width > 0 && bounds.x < Constants.GAME_DIMENSIONS.WIDTH &&
-                bounds.y + bounds.height > 20 && bounds.y < Constants.GAME_DIMENSIONS.HEIGHT;
-        };
-
-        const applyDirectly = targets.length >= 100;
-
-        targets.forEach((enemy, index) => {
-            if (!isWithinScreen(enemy)) return;
-
-            const applyDamage = () => {
-                if (!enemy || enemy.deadFlg) return;
-                enemy.onDamage(damageAmount);
-            };
-
-            if (applyDirectly) {
-                applyDamage();
-            } else {
-                TweenMax.delayedCall(0.005 * index, applyDamage);
+        } else {
+            // Apply damage with delay for visual effect
+            for (let i = 0; i < targets.length; i++) {
+                const enemy = targets[i];
+                if (enemy.unit.x >= -enemy.unit.width / 2 &&
+                    enemy.unit.x <= Constants.GAME_DIMENSIONS.WIDTH &&
+                    enemy.unit.y >= 20 &&
+                    enemy.unit.y <= Constants.GAME_DIMENSIONS.HEIGHT) {
+                    TweenMax.delayedCall(0.005 * i, () => {
+                        enemy.onDamage(gameState.caDamage);
+                    });
+                }
             }
-        });
+        }
     }
 
     stageClear() {
