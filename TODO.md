@@ -1,7 +1,17 @@
 TODO
 ====
 
-special - shows line and dialog animation but does not hit enemies
+boss0 destroy error:
+TypeError: Cannot read properties of null (reading 'off')
+    at e.destroy (http://localhost:8001/games/2019/js/pixi.min.js:14:22046)
+    at e.destroy (http://localhost:8001/games/2019/js/pixi.min.js:17:18407)
+    at explosionInstance.onComplete (http://localhost:8001/games/2019/js/bosses/Boss.js:252:31)
+    at e.update (http://localhost:8001/games/2019/js/pixi.min.js:17:17953)
+    at t.emit (http://localhost:8001/games/2019/js/pixi.min.js:16:20131)
+    at t.update (http://localhost:8001/games/2019/js/pixi.min.js:16:19110)
+    at _tick (http://localhost:8001/games/2019/js/pixi.min.js:16:17293)
+
+special shows line, dialog, and explosions but does not damage enemies
 
 HUD - rename ca -> sp
 
