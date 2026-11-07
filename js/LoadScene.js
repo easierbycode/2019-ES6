@@ -26,7 +26,7 @@ export class LoadScene extends BaseScene {
         this.preloadLoader = PIXI.loader;
 
         // Preload minimal assets for the selection screen
-        this.preloadLoader.add('mode_select_ui', `${gameState.baseUrl || Constants.BASE_PATH}assets/title_ui.json`);
+        this.preloadLoader.add('mode_select_ui', 'https://easierbycode.com/games/2019/assets/title_ui.json');
         this.preloadLoader.add('loading_bg', `${gameState.baseUrl || Constants.BASE_PATH}assets/img/loading/loading_bg.png`);
 
         // Attach error handler for preload loader
@@ -69,7 +69,7 @@ export class LoadScene extends BaseScene {
 
         // Define assets needed JUST for the mode select screen + loading anim
         const preloadAssets = [
-            { name: 'mode_select_ui', url: `${baseUrl}assets/title_ui.json` },
+            { name: 'mode_select_ui', url: 'https://easierbycode.com/games/2019/assets/title_ui.json' },
             { name: 'loadingFrame0', url: `${baseUrl}assets/img/loading/loading0.gif` },
             { name: 'loadingFrame1', url: `${baseUrl}assets/img/loading/loading1.gif` },
             { name: 'loadingFrame2', url: `${baseUrl}assets/img/loading/loading2.gif` },
